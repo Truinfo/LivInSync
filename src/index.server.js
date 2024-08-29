@@ -16,7 +16,7 @@ const io = socketIo(server, {
   }
 });
 mongoose.connect(
-  `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGo_DB_Password}@cluster0.hed3y9h.mongodb.net/${process.env.Mongo_Db_DATABASE}?retryWrites=true&w=majority&appName=Cluster0`,
+  `mongodb+srv://truquest:truquest143@cluster0.hed3y9h.mongodb.net/LiveEasy?retryWrites=true&w=majority&appName=Cluster0`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
