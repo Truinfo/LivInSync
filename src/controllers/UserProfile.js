@@ -262,9 +262,7 @@ exports.updateUserProfile = async (req, res) => {
             }
 
             const { id } = req.params;
-            console.log(id)
             const uploadFields = { ...req.body };
-            console.log(uploadFields)
             delete uploadFields.id;
 
             try {
@@ -272,7 +270,6 @@ exports.updateUserProfile = async (req, res) => {
                 if (!userProfile) {
                     return res.status(404).json({ success: false, message: "No Match Found" });
                 }
-                console.log("file", req.file)
                 // Handle file upload if profilePicture field is present
                 if (req.file) {
                     console.log(req.file)

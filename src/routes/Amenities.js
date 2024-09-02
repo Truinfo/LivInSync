@@ -9,8 +9,7 @@ router.get('/getAmenityOfCommunityHal/:societyId', getAmenityOfCommunityHal);
 router.put('/updateAmenity/:id', updateAmenity);
 router.delete('/deleteAmenity/:id', deleteAmenity);
 
-
-router.put('/bookAmenity/:id', bookAmenity);
+router.post('/bookAmenity/:id', bookAmenity);
 router.get('/getAmenityByIdAndUserId/:id/:userId', getAmenityByIdAndUserId);
 router.put('/updateAmenityBooking/:id/:userId', updateAmenityBooking);
 router.delete('/deleteAmenityBooking/:id/:userId', deleteAmenityBooking);
