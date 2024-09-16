@@ -1,3 +1,4 @@
+
 const Documents = require('../models/Documents');
 const multer = require('multer');
 const path = require('path');
@@ -21,61 +22,169 @@ const storage = multer.diskStorage({
 const upload = multer({ storage }).single('pictures');
 
 
+// exports.createDocuments = async (req, res) => {
+//   try {
+//     upload(req, res, async (err) => {
+//       if (err) {
+//         console.log("error in uploading files:", err);
+//         return res.status(500).json({ success: false, message: 'An error occurred in creating files' });
+//       }
+
+//       const { societyId, name, documentTitle, blockNumber, flatNumber } = req.body;
+//       console.log(societyId, name, documentTitle, blockNumber, flatNumber);
+//       console.log(req.file)
+//       if (!req.file) {
+//         // If no document is provided, respond without creating an entry
+//         return res.status(400).json({ success: false, message: "No document file provided" });
+//       }
+      
+//       try {
+//         // If a file is provided, process and save the document
+//         const pictures = `/publicDocuments/${req.file.filename}`;
+
+//         const document = new Documents({
+//           societyId,
+//           name,
+//           documentTitle,
+//           blockNumber,
+//           flatNumber,
+//           pictures
+//         });
+
+//         await document.save();
+//         return res.status(201).json({ success: true, message: "Document successfully added" });
+//       } catch (error) {
+//         console.log(`Error: ${error}`);
+//         return res.status(401).json({ success: false, message: `Error: ${error}` });
+//       }
+//     });
+//   } catch (error) {
+//     console.log(`Error: ${error}`);
+//     return res.status(500).json({ success: false, message: "An error occurred" });
+//   }
+// };
+
 exports.createDocuments = async (req, res) => {
   try {
     upload(req, res, async (err) => {
       if (err) {
-        console.log("error in uploading files:", err);
-        return res.status(500).json({ success: false, message: 'An error Occoured in creating files' })
+        console.log("Error in uploading files:", err);
+        return res.status(500).json({ success: false, message: 'An error occurred in creating files' });
       }
+
+      const { societyId, name, documentTitle, blockNumber, flatNumber } = req.body;
+      console.log(societyId, name, documentTitle, blockNumber, flatNumber);
+
+      if (!req.file) {
+        // If no document is provided, respond without creating an entry
+        return res.status(400).json({ success: false, message: "No document file provided" });
+      }
+
       try {
-        const { societyId, name, documentTitle, blockNumber, flatNumber } = req.body;
-        let pictures = '';
+        const pictures = `/publicDocuments/${req.file.filename}`;
 
-        if (req.file) {
-          pictures = `/publicDocuments/${req.file.filename}`;
-        }
-
-        const document = new Documents({
-          societyId, name, documentTitle, blockNumber, flatNumber, pictures
+        // Check if a document with the same criteria already exists
+        let document = await Documents.findOne({
+          societyId,
+          name,
+          documentTitle,
+          blockNumber,
+          flatNumber
         });
-        await document.save();
-        return res.status(201).json({ success: true, message: "Successfully added" })
+
+        if (document) {
+          // If document exists, delete the old file from the server
+          const oldFilePath = path.join(__dirname, '../Uploads/Documents', path.basename(document.pictures));
+          fs.unlink(oldFilePath, (err) => {
+            if (err) {
+              console.log("Error deleting old file:", err);
+            } else {
+              console.log("Old file successfully deleted");
+            }
+          });
+
+          // Update document with the new file
+          document.pictures = pictures;
+          await document.save();
+          return res.status(200).json({ success: true, message: "Document successfully updated" });
+        } else {
+          // If no document exists, create a new one
+          document = new Documents({
+            societyId,
+            name,
+            documentTitle,
+            blockNumber,
+            flatNumber,
+            pictures
+          });
+
+          await document.save();
+          return res.status(201).json({ success: true, message: "Document successfully added" });
+        }
       } catch (error) {
-        console.log(`error is ${error}`)
-        return res.status(401).json({ success: false, message: `error is ${error}` })
+        console.log(`Error: ${error}`);
+        return res.status(401).json({ success: false, message: `Error: ${error}` });
       }
-    })
+    });
   } catch (error) {
-    console.log(`error in ${error}`)
-    return res.status(301).json({ success: false, message: "Error in " })
+    console.log(`Error: ${error}`);
+    return res.status(500).json({ success: false, message: "An error occurred" });
   }
-}
+};
 
-
-exports.getDocumentsBySocietyId = async(req, res) => {
+exports.getDocumentsBySocietyId = async (req, res) => {
   try {
-    const {societyId} = req.params;
-    const document = await Documents.find({societyId});
-    if(document.length === 0){
-      return res.status(301).json({success: false, message: "No Match Found"})
+    const { societyId } = req.params;
+    const document = await Documents.find({ societyId });
+    if (document.length === 0) {
+      return res.status(301).json({ success: false, message: "No Match Found" })
     }
-    return res.status(201).json({success: true, document});
+    return res.status(201).json({ success: true, document });
   } catch (error) {
-    return res.status(401).json({succes: false, meesage: `error is:${error}`})
+    return res.status(401).json({ succes: false, meesage: `error is:${error}` })
   }
 }
 
-exports.getDocumentsById= async(req, res) => {
+exports.getDocumentsBySocietyBlockFlat = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { societyId, blockNumber, flatNumber } = req.params;
+
+    console.log(societyId, blockNumber, flatNumber)
+    const documents = await Documents.find({
+      societyId,
+      blockNumber,
+      flatNumber,
+    });
+
+    if (documents.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No documents found for the given society, block, and flat",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      documents:documents,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error fetching documents: ${error.message}`,
+    });
+  }
+};
+
+exports.getDocumentsById = async (req, res) => {
+  try {
+    const { id } = req.params;
     const document = await Documents.findById(id);
-    if(!document){
-      return res.status(301).json({success: false, message: "No Match Found"})
+    if (!document) {
+      return res.status(301).json({ success: false, message: "No Match Found" })
     }
-    return res.status(201).json({success: true, document});
+    return res.status(201).json({ success: true, document });
   } catch (error) {
-    return res.status(401).json({succes: false, meesage: `error is:${error}`})
+    return res.status(401).json({ succes: false, meesage: `error is:${error}` })
   }
 }
 
@@ -138,7 +247,7 @@ exports.deleteDocuments = async (req, res) => {
 
     if (document.pictures) {
       const imagePath = path.join(__dirname, '../Uploads/Documents', path.basename(document.pictures));
-      
+
       if (fs.existsSync(imagePath)) {
         try {
           fs.unlinkSync(imagePath);
@@ -158,6 +267,6 @@ exports.deleteDocuments = async (req, res) => {
 
   } catch (error) {
     console.error(`Error deleting Documents: ${error}`);
-      return res.status(500).json({ success: false, message: "Internal Server Error", error });
-    }
-  };
+    return res.status(500).json({ success: false, message: "Internal Server Error", error });
+  }
+};
