@@ -83,7 +83,7 @@ const UserProfileSchema = new mongoose.Schema({
     },
     userType: {
         type: String,
-        enum: ["Owner", "Tendent", "Bachelor"]
+        enum: ["Owner", "Tenant", "Bachelor"]
     },
     name: { 
         type: String,

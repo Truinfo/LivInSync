@@ -15,8 +15,9 @@ const saltRounds = 10;
 const generatedProductCodes = new Set(); // Define a set to store generated product codes
 
 
+
 const generateLicense = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = '0123456789';
     let productCode;
     let numberOfNumbers = 0;
     do {
@@ -31,8 +32,8 @@ const generateLicense = () => {
             }
             productCode += randomChar;
         }
-    } while (generatedProductCodes.has(productCode) || numberOfNumbers < 3); // Check for uniqueness and at least three numbers
-    generatedProductCodes.add(productCode); // Add the generated product code to the set
+    } while (generatedProductCodes.has(productCode) || numberOfNumbers < 3);
+    generatedProductCodes.add(productCode); 
     return productCode;
 };
 
@@ -265,6 +266,25 @@ exports.societyForgotPassword = async (req, res) => {
     } catch (error) {
         console.error("Forgot password error:", error);
         res.status(500).send('Internal server error');
+    }
+};
+
+exports.getSocietyByLicenceId= async (req, res) => {
+    const { licenseId } = req.params;
+    try {
+        const society = await SocietyAdmin.findOne({ license: licenseId });
+        if (!society) {
+            return res.status(404).json({ message: "Society not found" });
+        }
+        console.log(society)
+        res.status(200).json({
+            society: society
+        });
+    } catch (error) {
+        console.error("Error fetching society by societyId:", error);
+        res.status(500).json({
+            message: "Failed to fetch society"
+        });
     }
 };
 

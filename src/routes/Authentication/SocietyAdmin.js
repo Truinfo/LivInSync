@@ -7,6 +7,7 @@ const { societySignup, societyVerifyCodeAndResetPassword,
     getAllSocieties,
     renewSocietyPlan,
     societyResetPassword,
+    getSocietyByLicenceId,
     profile} = require('../../controllers/Authentication/SocietyAdmin');
 const router = express.Router();
 
@@ -24,4 +25,7 @@ router.get('/society', getAllSocieties);
 router.put('/society/renewal',  renewSocietyPlan);
 router.post('/society/resetPassword',  societyResetPassword);
 
+
+
+router.get('/society/getSocietyByLicenceId/:licenseId', getSocietyByLicenceId);
 module.exports = router;
