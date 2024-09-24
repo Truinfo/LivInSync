@@ -79,7 +79,7 @@ const UserProfileSchema = new mongoose.Schema({
     },
     societyId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "society",
+        ref: "Societys",
     },
     userType: {
         type: String,
