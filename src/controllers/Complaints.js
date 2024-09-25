@@ -78,3 +78,19 @@ exports.deleteComplaint = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+exports.updateComplaintStatus = async (req, res) => {
+    const { societyId, complaintId } = req.params;
+    try {
+        const updatedComplaint = await Complaint.findOneAndUpdate(
+            { societyId, complaintId },
+            resolution:"Resolved",
+            { new: true }
+        );
+        if (!updatedComplaint) {
+            return res.status(404).json({ success: true, message: 'Complaint not found' });
+        }
+        res.status(201).json({ success: true, Complaints: updatedComplaint });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
