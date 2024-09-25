@@ -79,18 +79,26 @@ exports.deleteComplaint = async (req, res) => {
     }
 };
 exports.updateComplaintStatus = async (req, res) => {
-    const { societyId, complaintId } = req.params;
+    const { societyId, complaintId } = req.params; // Extracting parameters from the request
+    const { resolution } = req.body; // Assuming resolution is sent in the request body
+
     try {
+        // Updating the complaint status in the database
         const updatedComplaint = await Complaint.findOneAndUpdate(
-            { societyId, complaintId },
-            resolution:"Resolved",
-            { new: true }
+            { societyId, complaintId }, // Filter for the specific complaint
+            { resolution: "Resolved" }, // Update object
+            { new: true, runValidators: true } // Options to return the updated document and run validators
         );
+
+        // Check if the complaint was found and updated
         if (!updatedComplaint) {
-            return res.status(404).json({ success: true, message: 'Complaint not found' });
+            return res.status(404).json({ success: false, message: 'Complaint not found' });
         }
-        res.status(201).json({ success: true, Complaints: updatedComplaint });
+
+        // Sending a success response with the updated complaint
+        res.status(200).json({ success: true, complaint: updatedComplaint });
     } catch (err) {
+        // Handle any errors that occur during the update
         res.status(400).json({ success: false, message: err.message });
     }
 };
