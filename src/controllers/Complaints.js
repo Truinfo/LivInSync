@@ -78,16 +78,17 @@ exports.deleteComplaint = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
 exports.updateComplaintStatus = async (req, res) => {
-    const { societyId, complaintId } = req.params; // Extracting parameters from the request
-    const { resolution } = req.body; // Assuming resolution is sent in the request body
+    const { complaintId } = req.params; // Extract complaintId from request parameters
+    const { resolution } = req.body; // Get resolution from request body
 
     try {
-        // Updating the complaint status in the database
-        const updatedComplaint = await Complaint.findOneAndUpdate(
-             complaintId, // Filter for the specific complaint
-             { $set: { resolution:  "Resolved" } }, // Update object
-            { new: true } // Options to return the updated document and run validators
+        // Updating the complaint status in the database by ID
+        const updatedComplaint = await Complaint.findByIdAndUpdate(
+            complaintId, // The ID of the complaint to update
+            { $set: { resolution: resolution || "Resolved" } }, // Update object with optional resolution
+            { new: true, runValidators: true } // Options to return the updated document and run validators
         );
 
         // Check if the complaint was found and updated
@@ -102,3 +103,4 @@ exports.updateComplaintStatus = async (req, res) => {
         res.status(400).json({ success: false, message: err.message });
     }
 };
+
