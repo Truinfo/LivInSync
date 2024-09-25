@@ -86,7 +86,7 @@ exports.updateComplaintStatus = async (req, res) => {
         // Updating the complaint status in the database
         const updatedComplaint = await Complaint.findOneAndUpdate(
             { societyId, complaintId }, // Filter for the specific complaint
-            {  { $set: { resolution:  "Resolved" } }, // Update object
+             { $set: { resolution:  "Resolved" } }, // Update object
             { new: true } // Options to return the updated document and run validators
         );
 
