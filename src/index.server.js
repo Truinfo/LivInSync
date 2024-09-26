@@ -537,10 +537,7 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(4000, () => {
-  console.log('Socket on *:4000');
+server.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running and listening on port ${port}`);
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
-});
