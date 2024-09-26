@@ -12,7 +12,7 @@ const server = http.createServer(app);
 env.config()
 const io = socketIo(server, {
   cors: {
-    origin: "http://10.0.2.2:2000/", // Update this to the correct client origin in production
+    origin: "https://livinsync.onrender.com", // Update this to the correct client origin in production
   }
 });
 mongoose.connect(
