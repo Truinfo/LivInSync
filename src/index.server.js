@@ -346,10 +346,9 @@ io.on('connection', (socket) => {
   });
   socket.on('deletePoll', async (pollId) => {
     try {
-      console.log(pollId)
       // Delete the poll from the database
       const result=await Polls.findByIdAndDelete(pollId);
-       console.log(result)
+       console.log(result,pollId)
       // Fetch the updated list of polls
       const remainingPolls = await Polls.find(); // Adjust the query as needed
       // Notify all clients about the deletion and send the updated polls
