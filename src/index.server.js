@@ -72,17 +72,6 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use('/publicPictures', express.static(path.join(__dirname, 'Advertisements')));
-// app.use('/publicQRcodes', express.static(path.join(__dirname, 'QrScanner')));
-// app.use('/publicUser', express.static(path.join(__dirname, 'UserProfile')));
-// app.use('/publicEvents', express.static(path.join(__dirname, 'Events')));
-// app.use('/publicServices', express.static(path.join(__dirname, 'ServicesPictures')));
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
-// app.use('/publicEvents', express.static(path.join(__dirname, 'publicEvents')));
-// app.use('/publicAdminDocuments', express.static(path.join(__dirname, 'AdminDocuments')));
-// app.use('/publicSocietyDocuments', express.static(path.join(__dirname, 'SocietyDocuments')));
-
-
 app.use('/publicQRcodes', express.static(path.join(__dirname, 'QrScanner')));
 app.use('/publicServices', express.static(path.join(__dirname, 'ServicesPictures')));
 app.use('/ServicesPictures', express.static(path.join(__dirname, 'ServicesPictures')));
@@ -386,7 +375,7 @@ socket.on('editPoll', async (data) => {
     io.emit('pollsUpdated', remainingPolls);
     
     // Send success response back to the client
-    socket.emit('edit_poll_success', { success: true, updatedPoll });
+    io.to(updatedPoll.societyId).emit("polls_by_society_id", updatedPoll);
   } catch (error) {
     console.error("Error editing poll:", error);
     socket.emit('edit_poll_error', { success: false, message: "Error editing poll", error: error.message });
