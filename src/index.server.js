@@ -9,6 +9,7 @@ const http = require('http');
 const socketIo = require("socket.io")
 const server = http.createServer(app);
 
+
 env.config()
 const io = socketIo(server, {
   cors: {
@@ -70,17 +71,6 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// app.use('/publicPictures', express.static(path.join(__dirname, 'Advertisements')));
-// app.use('/publicQRcodes', express.static(path.join(__dirname, 'QrScanner')));
-// app.use('/publicUser', express.static(path.join(__dirname, 'UserProfile')));
-// app.use('/publicEvents', express.static(path.join(__dirname, 'Events')));
-// app.use('/publicServices', express.static(path.join(__dirname, 'ServicesPictures')));
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
-// app.use('/publicEvents', express.static(path.join(__dirname, 'publicEvents')));
-// app.use('/publicAdminDocuments', express.static(path.join(__dirname, 'AdminDocuments')));
-// app.use('/publicSocietyDocuments', express.static(path.join(__dirname, 'SocietyDocuments')));
-
 
 app.use('/publicQRcodes', express.static(path.join(__dirname, 'QrScanner')));
 app.use('/publicServices', express.static(path.join(__dirname, 'ServicesPictures')));
@@ -347,8 +337,9 @@ io.on('connection', (socket) => {
   socket.on('deletePoll', async (pollId) => {
     try {
       // Delete the poll from the database
-      const result=await Polls.findByIdAndDelete(pollId);
-       console.log(result,pollId)
+      console.log(pollId.pollId)
+      const result=await Polls.findByIdAndDelete(pollId.pollId);
+       console.log(result,pollId.pollId)
       // Fetch the updated list of polls
       const remainingPolls = await Polls.find(); // Adjust the query as needed
       // Notify all clients about the deletion and send the updated polls
@@ -357,7 +348,42 @@ io.on('connection', (socket) => {
       console.error("Error deleting poll:", error);
     }
   });
+socket.on('editPoll', async (data) => {
+  try {
+    const { pollId, updatedPollData } = data;
 
+    // Validate the poll ID
+    const isValidPollId = mongoose.Types.ObjectId.isValid(pollId);
+    if (!isValidPollId) {
+      return socket.emit('edit_poll_error', { success: false, message: "Invalid poll ID" });
+    }
+
+    // Find the poll and update it
+    const updatedPoll = await Polls.findByIdAndUpdate(
+      pollId,
+      { $set: { poll: updatedPollData }  }, // Update poll with the new data
+      { new: true } // Return the updated document
+    );
+
+    // Check if the poll was found and updated
+    if (!updatedPoll) {
+      return socket.emit('edit_poll_error', { success: false, message: "Poll not found" });
+    }
+
+    // Notify all clients about the updated poll
+    const remainingPolls = await Polls.find();
+    io.emit('pollsUpdated', remainingPolls);
+    
+    // Send success response back to the client
+    io.to(updatedPoll.societyId).emit("polls_by_society_id", updatedPoll);
+  } catch (error) {
+    console.error("Error editing poll:", error);
+    socket.emit('edit_poll_error', { success: false, message: "Error editing poll", error: error.message });
+  }
+});
+
+
+  
   //chat
   socket.on('createGroup', async (data) => {
     console.log(data)
