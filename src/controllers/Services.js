@@ -54,7 +54,6 @@ exports.createService = async (req, res) => {
 
       const { societyId, serviceType, name, phoneNumber, address, timings } = req.body;
 
-      console.log(req.files && req.files['pictures']);
 
       // Validate required fields
       if (!societyId || !serviceType || !name || !phoneNumber || !address || !timings) {
