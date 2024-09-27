@@ -387,7 +387,7 @@ exports.deleteEntryVisit = async (req, res) => {
       'society.societyId': societyId,
       'society.visitors._id': visitorId,
     });
-
+console.log(society)
     // Find the index of the visitor within the society's visitors array
     const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
     if (visitorIndex === -1) {
@@ -398,7 +398,7 @@ exports.deleteEntryVisit = async (req, res) => {
     society.society.visitors.splice(visitorIndex, 1);
     // Save the updated society document
     await society.save();
-
+console.log(society)
     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
   } catch (error) {
     console.error('Error deleting visitor:', error);
