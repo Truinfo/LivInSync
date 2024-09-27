@@ -372,7 +372,7 @@ socket.on('editPoll', async (data) => {
     // Find the poll and update it
     const updatedPoll = await Polls.findByIdAndUpdate(
       pollId,
-      { $set: updatedPollData }, // Update poll with the new data
+      { $set: { poll: updatedPollData }  }, // Update poll with the new data
       { new: true } // Return the updated document
     );
 
