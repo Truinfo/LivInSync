@@ -120,28 +120,16 @@ exports.createUserProfile = async (req, res) => {
     }
 };
 
-
 exports.userSignin = async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log(email);
 
-        let userProfile = await UserProfile.findOne({ email });
-        let securityProfile = await Sequrity.findOne({ email });
+        // Check for SocietyAdmin first
+        let profile = await SocietyAdmin.findOne({ email }) || await UserProfile.findOne({ email }) || await Sequrity.findOne({ email });
 
-        if (!userProfile && !securityProfile) {
+        if (!profile) {
             return res.status(400).json({ message: "User not found" });
-        }
-
-        let profile;
-        let profileType;
-
-        if (userProfile) {
-            profile = userProfile;
-            profileType = "User";
-        } else if (securityProfile) {
-            profile = securityProfile;
-            profileType = "Sequrity";
         }
 
         const isPasswordValid = await bcrypt.compare(password, profile.hash_password);
@@ -149,13 +137,15 @@ exports.userSignin = async (req, res) => {
             return res.status(400).json({ message: "Invalid Password" });
         }
 
-        if (profileType === "User" && profile.role !== "User") {
-            return res.status(400).json({ message: "You do not have User privileges" });
-        } else if (profileType === "Sequrity" && profile.role !== "Sequrity") {
-            return res.status(400).json({ message: "You do not have Sequrity privileges" });
+        // Check privileges based on profile type
+        const role = profile.role;
+        if ((profile instanceof SocietyAdmin && role !== "SocietyAdmin") || 
+            (profile instanceof UserProfile && role !== "User") || 
+            (profile instanceof Sequrity && role !== "Sequrity")) {
+            return res.status(400).json({ message: `You do not have ${role} privileges` });
         }
 
-        const token = generateJwtToken(profile._id, profile.role);
+        const token = generateJwtToken(profile._id, role);
 
         res.status(200).json({
             token,
@@ -167,6 +157,54 @@ exports.userSignin = async (req, res) => {
         return res.status(500).json({ message: "Something went wrong" });
     }
 };
+
+
+// exports.userSignin = async (req, res) => {
+//     try {
+//         const { email, password } = req.body;
+//         console.log(email);
+
+//         let userProfile = await UserProfile.findOne({ email });
+//         let securityProfile = await Sequrity.findOne({ email });
+
+//         if (!userProfile && !securityProfile) {
+//             return res.status(400).json({ message: "User not found" });
+//         }
+
+//         let profile;
+//         let profileType;
+
+//         if (userProfile) {
+//             profile = userProfile;
+//             profileType = "User";
+//         } else if (securityProfile) {
+//             profile = securityProfile;
+//             profileType = "Sequrity";
+//         }
+
+//         const isPasswordValid = await bcrypt.compare(password, profile.hash_password);
+//         if (!isPasswordValid) {
+//             return res.status(400).json({ message: "Invalid Password" });
+//         }
+
+//         if (profileType === "User" && profile.role !== "User") {
+//             return res.status(400).json({ message: "You do not have User privileges" });
+//         } else if (profileType === "Sequrity" && profile.role !== "Sequrity") {
+//             return res.status(400).json({ message: "You do not have Sequrity privileges" });
+//         }
+
+//         const token = generateJwtToken(profile._id, profile.role);
+
+//         res.status(200).json({
+//             token,
+//             profile,
+//         });
+
+//     } catch (error) {
+//         console.error("Signin error:", error);
+//         return res.status(500).json({ message: "Something went wrong" });
+//     }
+// };
 
 exports.getAllUserProfilesBySocietyId = async (req, res) => {
 
