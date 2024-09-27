@@ -347,6 +347,7 @@ io.on('connection', (socket) => {
   socket.on('deletePoll', async (pollId) => {
     try {
       // Delete the poll from the database
+      console.log(pollId)
       const result=await Polls.findByIdAndDelete(pollId);
        console.log(result,pollId)
       // Fetch the updated list of polls
