@@ -382,29 +382,28 @@ exports.deleteEntryVisit = async (req, res) => {
   const { societyId, visitorId } = req.params;
 
   try {
-    // Find the society document
-    const society = await Visitor.findOne({
-      'society.societyId': societyId,
-      'society.visitors.visitorId': visitorId,
-    });
-console.log(society)
-    // Find the index of the visitor within the society's visitors array
-    const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
-    if (visitorIndex === -1) {
+    // Find the society document and remove the visitor from the visitors array
+    const updatedSociety = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,
+        'society.visitors.visitorId': visitorId,
+      },
+      { $pull: { 'society.visitors': { visitorId: visitorId } } }, // Use $pull to remove the visitor
+      { new: true } // Return the modified document
+    );
+
+    // Check if the society document was found
+    if (!updatedSociety) {
       return res.status(404).json({ success: false, message: 'Visitor not found' });
     }
 
-    // Remove the visitor from the visitors array
-    society.society.visitors.splice(visitorIndex, 1);
-    // Save the updated society document
-    await society.save();
-console.log(society)
-    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society: updatedSociety });
   } catch (error) {
     console.error('Error deleting visitor:', error);
     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
+
 
 
 //get all pre approved Visitors
