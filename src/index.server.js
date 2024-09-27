@@ -359,7 +359,42 @@ io.on('connection', (socket) => {
       console.error("Error deleting poll:", error);
     }
   });
+socket.on('editPoll', async (data) => {
+  try {
+    const { pollId, updatedPollData } = data;
 
+    // Validate the poll ID
+    const isValidPollId = mongoose.Types.ObjectId.isValid(pollId);
+    if (!isValidPollId) {
+      return socket.emit('edit_poll_error', { success: false, message: "Invalid poll ID" });
+    }
+
+    // Find the poll and update it
+    const updatedPoll = await Polls.findByIdAndUpdate(
+      pollId,
+      { $set: updatedPollData }, // Update poll with the new data
+      { new: true } // Return the updated document
+    );
+
+    // Check if the poll was found and updated
+    if (!updatedPoll) {
+      return socket.emit('edit_poll_error', { success: false, message: "Poll not found" });
+    }
+
+    // Notify all clients about the updated poll
+    const remainingPolls = await Polls.find();
+    io.emit('pollsUpdated', remainingPolls);
+    
+    // Send success response back to the client
+    socket.emit('edit_poll_success', { success: true, updatedPoll });
+  } catch (error) {
+    console.error("Error editing poll:", error);
+    socket.emit('edit_poll_error', { success: false, message: "Error editing poll", error: error.message });
+  }
+});
+
+
+  
   //chat
   socket.on('createGroup', async (data) => {
     console.log(data)
