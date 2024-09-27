@@ -54,7 +54,6 @@ exports.createService = async (req, res) => {
 
       const { societyId, serviceType, name, phoneNumber, address, timings } = req.body;
 
-
       console.log(req.files && req.files['pictures']);
 
       // Validate required fields
@@ -139,7 +138,6 @@ exports.createService = async (req, res) => {
 exports.getAllServicePersons = async (req, res) => {
   try {
     const { societyId } = req.params;
-    console.log('Received societyId:', societyId);
 
     const service = await Services.findOne({ 'society.societyId': societyId });
     if (!service) {
@@ -252,7 +250,7 @@ exports.updateServicePerson = async (req, res) => {
       serviceProvider.phoneNumber = phoneNumber;
       serviceProvider.address = address;
       serviceProvider.timings = Array.isArray(timings) ? timings : [timings]; // Ensure timings is an array
-
+      console.log("file", req.files)
       // Handle pictures update
       if (req.files && req.files['pictures'] && req.files['pictures'].length > 0) {
         // Delete old picture if exists
