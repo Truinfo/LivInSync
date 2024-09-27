@@ -385,7 +385,7 @@ exports.deleteEntryVisit = async (req, res) => {
     // Find the society document
     const society = await Visitor.findOne({
       'society.societyId': societyId,
-      'society.visitors._id': visitorId,
+      'society.visitors.visitorId': visitorId,
     });
 console.log(society)
     // Find the index of the visitor within the society's visitors array
