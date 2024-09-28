@@ -410,28 +410,28 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 
 
-// exports.deleteEntryVisit = async (req, res) => {
-//   const { societyId, visitorId } = req.params; // visitorId here refers to the visitor's _id
+exports.deleteEntryVisit = async (req, res) => {
+  const { societyId, visitorId } = req.params; // visitorId here refers to the visitor's _id
 
-//   try {
-//     // Find the society document and remove the visitor from the visitors array
-//     const society = await Visitor.findOneAndUpdate(
-//       { 'society.societyId': societyId },  // Find the society by its societyId
-//       { $pull: { 'society.visitors': { _id: visitorId } } }, // Use $pull to remove the visitor by _id
-//       { new: true }  // Return the updated document
-//     );
+  try {
+    // Find the society document and remove the visitor from the visitors array
+    const society = await Visitor.findOneAndUpdate(
+      { 'society.societyId': societyId },  // Find the society by its societyId
+      { $pull: { 'society.visitors': { _id: visitorId } } }, // Use $pull to remove the visitor by _id
+      { new: true }  // Return the updated document
+    );
 
-//     // If no society or visitor is found
-//     if (!society) {
-//       return res.status(404).json({ success: false, message: 'Visitor not found' });
-//     }
+    // If no society or visitor is found
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
 
-//     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
-//   } catch (error) {
-//     console.error('Error deleting visitor:', error);
-//     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
-//   }
-// };
+    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+  } catch (error) {
+    console.error('Error deleting visitor:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+};
 
 
 
