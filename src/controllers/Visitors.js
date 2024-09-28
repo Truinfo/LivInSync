@@ -379,25 +379,29 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 
 exports.deleteEntryVisit = async (req, res) => {
-  const { societyId, visitorId } = req.params;
+ const { societyId, block, flatNo, visitorId } = req.params;
 
   try {
     // Find the society document and remove the visitor from the visitors array
-    const updatedSociety = await Visitor.findOneAndUpdate(
-      {
-        'society.societyId': societyId,
-        'society.visitors.visitorId': visitorId,
-      },
-      { $pull: { 'society.visitors': { visitorId: visitorId } } }, // Use $pull to remove the visitor
-      { new: true } // Return the modified document
-    );
+   const society = await Visitor.findOne({
+      'society.societyId': societyId,
+      'society.visitors.block': block,
+      'society.visitors.flatNo': flatNo,
+    });
 
     // Check if the society document was found
-    if (!updatedSociety) {
+    const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
+    if (visitorIndex === -1) {
       return res.status(404).json({ success: false, message: 'Visitor not found' });
     }
 
-    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society: updatedSociety });
+    // Remove the visitor from the visitors array
+    society.society.visitors.splice(visitorIndex, 1);
+
+    // Save the updated society document
+    await society.save();
+
+    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
   } catch (error) {
     console.error('Error deleting visitor:', error);
     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
