@@ -378,27 +378,59 @@ exports.deleteFrequentVisitors = async (req, res) => {
 // delete entry
 
 
+// exports.deleteEntryVisit = async (req, res) => {
+//  const { societyId, block, flatNo, visitorId } = req.params;
+// console.log( societyId, block, flatNo, visitorId)
+//   try {
+//     // Find the society document and remove the visitor from the visitors array
+//    const society = await Visitor.findOne({
+//       'society.societyId': societyId,
+//       'society.visitors.block': block,
+//       'society.visitors.flatNo': flatNo,
+//     });
+// console.log( societyId, block, flatNo, visitorId)
+//     // Check if the society document was found
+//     const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
+//     if (visitorIndex === -1) {
+//       return res.status(404).json({ success: false, message: 'Visitor not found' });
+//     }
+
+//     // Remove the visitor from the visitors array
+//     society.society.visitors.splice(visitorIndex, 1);
+
+//     // Save the updated society document
+//     await society.save();
+
+//     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+//   } catch (error) {
+//     console.error('Error deleting visitor:', error);
+//     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+//   }
+// };
+
+
+
 exports.deleteEntryVisit = async (req, res) => {
- const { societyId, block, flatNo, visitorId } = req.params;
-console.log( societyId, block, flatNo, visitorId)
+  const { societyId, visitorId } = req.params;
+
+  console.log('societyId:', societyId);
+  console.log('visitorId:', visitorId);
+
   try {
-    // Find the society document and remove the visitor from the visitors array
-   const society = await Visitor.findOne({
-      'society.societyId': societyId,
-      'society.visitors.block': block,
-      'society.visitors.flatNo': flatNo,
-    });
-console.log( societyId, block, flatNo, visitorId)
-    // Check if the society document was found
-    const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
+    // Check if society exists
+    const society = await Visitor.findOne({ 'society.societyId': societyId });
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Society not found' });
+    }
+
+    // Check if visitor exists
+    const visitorIndex = society.society.visitors.findIndex(visitor => visitor._id.toString() === visitorId);
     if (visitorIndex === -1) {
       return res.status(404).json({ success: false, message: 'Visitor not found' });
     }
 
     // Remove the visitor from the visitors array
     society.society.visitors.splice(visitorIndex, 1);
-
-    // Save the updated society document
     await society.save();
 
     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
@@ -407,6 +439,10 @@ console.log( societyId, block, flatNo, visitorId)
     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
+
+
+
+
 // exports.deleteEntryVisit = async (req, res) => {
 //   const { societyId, visitorId } = req.params; // visitorId here refers to the visitor's _id
 
