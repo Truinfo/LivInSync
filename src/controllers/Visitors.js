@@ -411,15 +411,21 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 
 exports.deleteEntryVisit = async (req, res) => {
-  const { societyId, visitorId } = req.params; // visitorId here refers to the visitor's _id
+  const { societyId, visitorId ,flatNo,block} = req.params; // visitorId here refers to the visitor's _id
 
   try {
     // Find the society document and remove the visitor from the visitors array
-    const society = await Visitor.findOneAndUpdate(
-      { 'society.societyId': societyId },  // Find the society by its societyId
-      { $pull: { 'society.visitors': { _id: visitorId } } }, // Use $pull to remove the visitor by _id
-      { new: true }  // Return the updated document
-    );
+    // const society = await Visitor.findOneAndUpdate(
+    //   { 'society.societyId': societyId },  // Find the society by its societyId
+    //   { $pull: { 'society.visitors': { _id: visitorId } } }, // Use $pull to remove the visitor by _id
+    //   { new: true }  // Return the updated document
+    // );
+    const society = await Visitor.findOneAndDelete({
+  'society.societyId': societyId,
+  'society.visitors._id': visitorId,
+  'society.visitors.flatNo': flatNo,
+  'society.visitors.block': block,
+});
 
     // If no society or visitor is found
     if (!society) {
