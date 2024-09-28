@@ -380,7 +380,7 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 exports.deleteEntryVisit = async (req, res) => {
  const { societyId, block, flatNo, visitorId } = req.params;
-
+console.log( societyId, block, flatNo, visitorId)
   try {
     // Find the society document and remove the visitor from the visitors array
    const society = await Visitor.findOne({
@@ -388,7 +388,7 @@ exports.deleteEntryVisit = async (req, res) => {
       'society.visitors.block': block,
       'society.visitors.flatNo': flatNo,
     });
-
+console.log( societyId, block, flatNo, visitorId)
     // Check if the society document was found
     const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
     if (visitorIndex === -1) {
