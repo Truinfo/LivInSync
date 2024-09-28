@@ -412,7 +412,7 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 exports.deleteEntryVisit = async (req, res) => {
   const { societyId, visitorId, flatNo, block } = req.params; // visitorId here refers to the visitor's _id
-
+console.log( societyId, block, flatNo, visitorId)
   try {
     // Find the society document and remove the visitor from the visitors array using $pull and additional matching fields (flatNo, block)
     const society = await Visitor.findOneAndUpdate(
