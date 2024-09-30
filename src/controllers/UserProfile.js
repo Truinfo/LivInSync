@@ -123,6 +123,7 @@ exports.userSignin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        console.log(req.body);
         // Check for SocietyAdmin first
         let profile = await SocietyAdmin.findOne({ email }) || await UserProfile.findOne({ email }) || await Sequrity.findOne({ email });
 
