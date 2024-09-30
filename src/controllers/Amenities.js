@@ -153,7 +153,7 @@ exports.updateAmenity = async (req, res) => {
 exports.deleteAmenity = async (req, res) => {
   const { id } = req.params;
   try {
-    const amenity = await Amenity.findById({ id });
+    const amenity = await Amenity.findById(id );
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }

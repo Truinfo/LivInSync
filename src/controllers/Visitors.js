@@ -43,121 +43,6 @@ const generateUserIdCode = () => {
   return userIdCode;
 };
 
-// Create a new visitor
-// exports.createVisitors = async (req, res) => {
-//   console.log(req.body)
-//   console.log(req.file, "pictures")
-//   try {
-//     // Handle file upload
-//     upload(req, res, async (err) => {
-//       if (err) {
-//         console.log("Error in uploading files:", err);
-//         return res.status(500).json({ success: false, message: 'An error occurred in uploading files' });
-//       }
-
-//       try {
-//         // Extract visitor data from request body
-//         const {
-//           societyId, name, phoneNumber, block, isFrequent,
-//           flatNo, role, reason, details, inGateNumber,
-//           status, inVehicleNumber, company, date, checkInDateTime
-//         } = req.body;
-
-//         // If checkInDateTime is '1', set it to the current date and time
-//         let checkInTime = checkInDateTime;
-//         if (checkInDateTime === '1') {
-//           checkInTime = new Date();
-//         }
-
-//         // Handle file uploads (if any)
-//         let pictures = '';
-//         if (req.files && req.files['pictures'] && req.files['pictures'].length > 0) {
-//           pictures = `/publicVisitorsPictures/${req.files['pictures'][0].fileName}`;
-//         }
-
-//         // Generate visitorId
-//         const visitorId = generateUserIdCode();
-
-//         // Create new visitor object
-//         const newVisitor = {
-//           visitorId,
-//           name,
-//           date,
-//           phoneNumber,
-//           block,
-//           flatNo,
-//           role,
-//           checkInDateTime: checkInTime,
-//           inGateNumber,
-//           status,
-//           reason,
-//           inVehicleNumber,
-//           details,
-//           company,
-//           pictures,
-//           qrImage: null,
-//           isFrequent
-//         };
-
-//         // Check if society exists
-//         let savedVisitor;
-//         const existingSociety = await Visitor.findOne({ 'society.societyId': societyId });
-
-//         if (existingSociety) {
-//           // Add new visitor to existing society
-//           savedVisitor = await Visitor.findOneAndUpdate(
-//             { 'society.societyId': societyId },
-//             { $push: { 'society.visitors': newVisitor } },
-//             { new: true }
-//           );
-//         } else {
-//           // Create a new society with the visitor
-//           const newSociety = new Visitor({
-//             society: {
-//               societyId,
-//               visitors: [newVisitor]
-//             }
-//           });
-//           savedVisitor = await newSociety.save();
-//         }
-
-//         // Generate QR Code
-//         const qrCodeFileName = uuidv4() + '.png';
-//         const qrCodeDir = path.join(__dirname, '../Uploads/VisitorsPictures');
-//         const qrCodeFilePath = path.join(qrCodeDir, qrCodeFileName);
-
-//         // Ensure directory exists
-//         if (!fs.existsSync(qrCodeDir)) {
-//           fs.mkdirSync(qrCodeDir, { recursive: true });
-//         }
-
-//         // Generate QR Code and get QR Code URL
-//         await QRCode.toFile(qrCodeFilePath, visitorId);
-//         const qrCodeUrl = `/publicQRVisitorsPictures/${qrCodeFileName}`;
-
-
-//         // Update visitor with QR Code path
-//         await Visitor.findOneAndUpdate(
-//           { 'society.societyId': societyId, 'society.visitors.visitorId': visitorId },
-//           { $set: { 'society.visitors.$.qrImage': qrCodeUrl } },
-//           { new: true }
-//         );
-
-//         res.status(201).json({ success: true, message: 'Visitor created successfully', data: { savedVisitor, qrCodeUrl } });
-
-//       } catch (error) {
-//         console.log("Error in creating visitor:", error);
-//         res.status(500).json({ success: false, message: 'An error occurred in creating visitor' });
-//       }
-//     });
-
-//   } catch (error) {
-//     console.log("Error in createVisitor controller:", error);
-//     res.status(500).json({ success: false, message: 'An error occurred' });
-//   }
-// };
-
-
 
 exports.createVisitors = async (req, res) => {
   try {
@@ -312,55 +197,6 @@ exports.checkoutVisitor = async (req, res) => {
     res.status(500).json({ success: false, message: 'An error occurred in checking out visitor' });
   }
 };
-
-// exports.checkInVisitor = async (req, res) => {
-//   try {
-//     const { societyId, visitorId, inGateNumber, inVehicleNumber } = req.body;
-
-//     // Find the visitor by visitorId
-//     const visitor = await Visitor.findOne({
-//       'society.societyId': societyId,
-//       'society.visitors.visitorId': visitorId
-//     });
-
-//     // If no visitor found, return 404
-//     if (!visitor) {
-//       return res.status(404).json({ success: false, message: 'Visitor not found' });
-//     }
-
-//     // Check if checkInDateTime exists to determine if already checked in
-//     if (visitor.society.visitors.checkInDateTime) {
-//       return res.status(400).json({ success: false, message: 'Visitor is already checked in' });
-//     }
-
-//     // Update the visitor's status and checkInDateTime
-//     const updatedVisitor = await Visitor.findOneAndUpdate(
-//       {
-//         'society.societyId': societyId,
-//         'society.visitors.visitorId': visitorId
-//       },
-//       {
-//         $set: {
-//           'society.visitors.$.status': 'Check In',
-//           'society.visitors.$.checkInDateTime': new Date(),
-//           'society.visitors.$.inGateNumber': inGateNumber,
-//           'society.visitors.$.inVehicleNumber': inVehicleNumber,
-//         }
-//       },
-//       { new: true }
-//     );
-
-//     // Handle case where visitor is not found after update attempt
-//     if (!updatedVisitor) {
-//       return res.status(404).json({ success: false, message: 'Visitor not found' });
-//     }
-
-//     res.status(200).json({ success: true, message: 'Visitor checked in successfully' });
-//   } catch (error) {
-//     console.log("Error in checking in visitor:", error);
-//     res.status(500).json({ success: false, message: 'An error occurred in checking in visitor' });
-//   }
-// };
 
 exports.checkInVisitor = async (req, res) => {
   try {
@@ -536,6 +372,75 @@ exports.deleteFrequentVisitors = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
+
+
+
+// delete entry
+
+
+// exports.deleteEntryVisit = async (req, res) => {
+//  const { societyId, block, flatNo, visitorId } = req.params;
+// console.log( societyId, block, flatNo, visitorId)
+//   try {
+//     // Find the society document and remove the visitor from the visitors array
+//    const society = await Visitor.findOne({
+//       'society.societyId': societyId,
+//       'society.visitors.block': block,
+//       'society.visitors.flatNo': flatNo,
+//     });
+// console.log( societyId, block, flatNo, visitorId)
+//     // Check if the society document was found
+//     const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
+//     if (visitorIndex === -1) {
+//       return res.status(404).json({ success: false, message: 'Visitor not found' });
+//     }
+
+//     // Remove the visitor from the visitors array
+//     society.society.visitors.splice(visitorIndex, 1);
+
+//     // Save the updated society document
+//     await society.save();
+
+//     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+//   } catch (error) {
+//     console.error('Error deleting visitor:', error);
+//     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+//   }
+// };
+
+
+
+exports.deleteEntryVisit = async (req, res) => {
+  const { societyId, visitorId, flatNo, block } = req.params; // visitorId here refers to the visitor's _id
+console.log( societyId, block, flatNo, visitorId)
+  try {
+    // Find the society document and remove the visitor from the visitors array using $pull and additional matching fields (flatNo, block)
+    const society = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,                   // Match society by ID
+        'society.visitors.flatNo': flatNo,                 // Match visitor by flat number
+        'society.visitors.block': block,                   // Match visitor by block
+        'society.visitors._id': visitorId,                 // Match visitor by visitorId
+      },
+      {
+        $pull: { 'society.visitors': { _id: visitorId } }, // Remove the specific visitor from the array
+      },
+      { new: true }  // Return the updated document after deletion
+    );
+
+    // If no society or visitor is found
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+  } catch (error) {
+    console.error('Error deleting visitor:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+};
+
+
 
 
 
