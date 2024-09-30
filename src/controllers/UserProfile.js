@@ -33,9 +33,8 @@ exports.sendVerificationEmail = async (req, res) => {
     console.log(req.body);
     try {
         const { email } = req.body;
-        const existingUser = await UserProfile.findOne({ email });
-        const existingAdmin = await SocietyAdmin.findOne({ email });
-        if (existingUser || existingAdmin) {
+        let profile = await SocietyAdmin.findOne({ email }) || await UserProfile.findOne({ email }) || await Sequrity.findOne({ email });
+        if (profile) {
             return res.status(400).json({ success: false, message: "Email already exists." });
         }
         const otp = generateVerificationCode();
@@ -139,8 +138,8 @@ exports.userSignin = async (req, res) => {
 
         // Check privileges based on profile type
         const role = profile.role;
-        if ((profile instanceof SocietyAdmin && role !== "SocietyAdmin") || 
-            (profile instanceof UserProfile && role !== "User") || 
+        if ((profile instanceof SocietyAdmin && role !== "SocietyAdmin") ||
+            (profile instanceof UserProfile && role !== "User") ||
             (profile instanceof Sequrity && role !== "Sequrity")) {
             return res.status(400).json({ message: `You do not have ${role} privileges` });
         }
@@ -319,7 +318,7 @@ exports.updateUserProfile = async (req, res) => {
                         }
                     }
 
-                   
+
                     uploadFields.profilePicture = `/publicUser/${req.file.filename}`;
                 }
 
