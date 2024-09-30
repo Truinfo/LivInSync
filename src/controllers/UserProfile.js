@@ -126,7 +126,7 @@ exports.userSignin = async (req, res) => {
 
         // Check for SocietyAdmin first
         let profile = await SocietyAdmin.findOne({ email }) || await UserProfile.findOne({ email }) || await Sequrity.findOne({ email });
-
+        console.log(profile);
         if (!profile) {
             return res.status(400).json({ message: "User not found" });
         }
