@@ -122,7 +122,6 @@ exports.createUserProfile = async (req, res) => {
 exports.userSignin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(email);
 
         // Check for SocietyAdmin first
         let profile = await SocietyAdmin.findOne({ email }) || await UserProfile.findOne({ email }) || await Sequrity.findOne({ email });
