@@ -328,10 +328,11 @@ exports.getAmenityByIdAndUserId = async (req, res) => {
 
 // Update Amenity Booking
 exports.updateAmenityBooking = async (req, res) => {
-  const { id, userId } = req.params;
-
+  const { id, userId } = req.params;  // 'id' refers to societyId in this case
   try {
-    const amenity = await Amenity.findById(id);
+    // Use findOne to search for amenity by societyId
+    const amenity = await Amenity.findOne({ societyId: id, amenityName: "Community Hall" });
+
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
@@ -341,10 +342,9 @@ exports.updateAmenityBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
 
-    // Update only the fields provided in req.body
     const updateFields = req.body;
+    // Merge the updated fields with the existing booking
     amenity.list[bookingIndex] = { ...amenity.list[bookingIndex]._doc, ...updateFields };
-
     await amenity.save();
 
     return res.json({ success: true, message: "Booking updated successfully" });
@@ -359,9 +359,9 @@ exports.updateAmenityBooking = async (req, res) => {
 // Delete Amenity Booking
 exports.deleteAmenityBooking = async (req, res) => {
   const { id, userId } = req.params;
-
   try {
-    const amenity = await Amenity.findById(id);
+    console.log(id, userId)
+    const amenity = await Amenity.findOne({ societyId: id, amenityName: "Community Hall" });
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
@@ -370,8 +370,8 @@ exports.deleteAmenityBooking = async (req, res) => {
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
-
     amenity.list.splice(bookingIndex, 1);
+    console.log(amenity)
     await amenity.save();
 
     return res.json({ success: true, message: "Booking deleted successfully" });
