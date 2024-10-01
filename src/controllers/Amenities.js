@@ -337,7 +337,7 @@ exports.updateAmenityBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
 
-    const bookingIndex = amenity.list.findIndex((booking) => booking.userId === userId);
+    const bookingIndex = amenity.list.findIndex((booking) => booking.userId.toString() === userId);
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
@@ -360,20 +360,20 @@ exports.updateAmenityBooking = async (req, res) => {
 exports.deleteAmenityBooking = async (req, res) => {
   const { id, userId } = req.params;
   try {
-    console.log(id, userId)
+    console.log("Society ID:", id, "User ID:", userId);
+
     const amenity = await Amenity.findOne({ societyId: id, amenityName: "Community Hall" });
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
-
-    const bookingIndex = amenity.list.findIndex((booking) => booking.userId === userId);
+    const bookingIndex = amenity.list.findIndex((booking) => {
+      return booking.userId.trim() === userId.trim();
+    });
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
     amenity.list.splice(bookingIndex, 1);
-    console.log(amenity)
     await amenity.save();
-
     return res.json({ success: true, message: "Booking deleted successfully" });
   } catch (error) {
     console.error(`Error deleting booking: ${error}`);
