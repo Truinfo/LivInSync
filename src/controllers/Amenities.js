@@ -337,7 +337,7 @@ exports.updateAmenityBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
 
-    const bookingIndex = amenity.list.findIndex((booking) => booking.userId.toString() === userId);
+    const bookingIndex = amenity.list.findIndex((booking) => booking.userId === userId);
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
@@ -366,7 +366,7 @@ exports.deleteAmenityBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
 
-    const bookingIndex = amenity.list.findIndex((booking) => booking.userId.toString() === userId);
+    const bookingIndex = amenity.list.findIndex((booking) => booking.userId === userId);
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
