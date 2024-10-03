@@ -41,7 +41,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage }).single('picture');
+const upload = multer({ storage }).single('pictures', 10);
 
 exports.createSequrity = async (req, res) => {
     try {
@@ -59,7 +59,7 @@ exports.createSequrity = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'No file uploaded.' });
             }
 
-            const picture = `/publicSequrityPictures/${req.file.filename}`;
+            const picture = `/publicSecurityPictures/${req.file.filename}`;
             const hash_password = await bcrypt.hash(req.body.password, 10);
 
             const {
@@ -105,11 +105,11 @@ exports.createSequrity = async (req, res) => {
 
             const savedSequrity = await newSequrity.save();
 
-            res.status(201).json({ success: true, message: 'Sequrity created successfully' });
+            res.status(201).json({ success: true, message: 'Security created successfully', savedSequrity});
         });
     } catch (error) {
-        console.error('Error creating sequrity:', error);
-        res.status(500).json({ success: false, message: 'Failed to create sequrity', error: error.message });
+        console.error('Error creating security:', error);
+        res.status(500).json({ success: false, message: 'Failed to create security', error: error.message });
     }
 };
 
@@ -214,6 +214,7 @@ exports.getAttendanceOfSequrityId = async (req, res) => {
 
 exports.updateSequrityProfile = async (req, res) => {
     try {
+        console.log(req.file)
         upload(req, res, async (error) => {
             if (error instanceof multer.MulterError) {
                 console.error('Multer error:', error);
@@ -225,9 +226,10 @@ exports.updateSequrityProfile = async (req, res) => {
 
             const { sequrityId } = req.params;
             const uploadFields = { ...req.body };
+      
 
             if (req.file) {
-                uploadFields.pictures = `/publicSequrityPictures/${req.file.filename}`;
+                uploadFields.pictures = `/publicSecurityPictures/${req.file.filename}`;
             }
 
             try {

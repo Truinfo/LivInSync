@@ -78,7 +78,7 @@ app.use('/ServicesPictures', express.static(path.join(__dirname, 'ServicesPictur
 app.use('/publicQRServicesPictures', express.static(path.join(__dirname, 'ServicesPictures')));
 
 app.use('/publicAssets', express.static(path.join(__dirname, 'Uploads/Assets')));
-app.use('/publicSecurityPictures', express.static(path.join(__dirname, 'Uploads/SecurityProfile')));
+app.use('/publicSecurityPictures', express.static(path.join(__dirname, 'Uploads/SequrityProfile')));
 app.use('/publicSocietyImages', express.static(path.join(__dirname, 'Uploads/SocietyProfile')));
 app.use('/publicSocietyDocuments', express.static(path.join(__dirname, 'Uploads/SocietyProfile')));
 app.use('/publicPictures', express.static(path.join(__dirname, 'Uploads/Advertisements')));
