@@ -328,10 +328,11 @@ exports.getAmenityByIdAndUserId = async (req, res) => {
 
 // Update Amenity Booking
 exports.updateAmenityBooking = async (req, res) => {
-  const { id, userId } = req.params;
-
+  const { id, userId } = req.params;  // 'id' refers to societyId in this case
   try {
-    const amenity = await Amenity.findById(id);
+    // Use findOne to search for amenity by societyId
+    const amenity = await Amenity.findOne({ societyId: id, amenityName: "Community Hall" });
+
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
@@ -341,10 +342,9 @@ exports.updateAmenityBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
 
-    // Update only the fields provided in req.body
     const updateFields = req.body;
+    // Merge the updated fields with the existing booking
     amenity.list[bookingIndex] = { ...amenity.list[bookingIndex]._doc, ...updateFields };
-
     await amenity.save();
 
     return res.json({ success: true, message: "Booking updated successfully" });
@@ -359,21 +359,21 @@ exports.updateAmenityBooking = async (req, res) => {
 // Delete Amenity Booking
 exports.deleteAmenityBooking = async (req, res) => {
   const { id, userId } = req.params;
-
   try {
-    const amenity = await Amenity.findById(id);
+    console.log("Society ID:", id, "User ID:", userId);
+
+    const amenity = await Amenity.findOne({ societyId: id, amenityName: "Community Hall" });
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
-
-    const bookingIndex = amenity.list.findIndex((booking) => booking.userId.toString() === userId);
+    const bookingIndex = amenity.list.findIndex((booking) => {
+      return booking.userId.trim() === userId.trim();
+    });
     if (bookingIndex === -1) {
       return res.status(404).json({ success: false, message: "Booking not found for this user" });
     }
-
     amenity.list.splice(bookingIndex, 1);
     await amenity.save();
-
     return res.json({ success: true, message: "Booking deleted successfully" });
   } catch (error) {
     console.error(`Error deleting booking: ${error}`);
