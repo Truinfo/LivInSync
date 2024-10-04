@@ -63,65 +63,56 @@
 // exports.checkOutStaff = async (req, res) => {
 //     try {
 //       const { societyId, visitorId, outGateNumber, outVehicleNumber } = req.body;
-  
+
 //       // Find the visitor staff record by societyId
 //       const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
-  
+
 //       // If no visitor staff record is found, return 404
 //       if (!visitorStaff) {
 //         return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
 //       }
-  
+
 //       // Find the index of the staff member by visitorId
 //       const staffIndex = visitorStaff.society.staff.findIndex(staff => staff.visitorId === visitorId);
-  
+
 //       // If no staff member is found, return 404
 //       if (staffIndex === -1) {
 //         return res.status(404).json({ success: false, message: 'Staff member not found or already checked out' });
 //       }
-  
+
 //       // Update the staff member's checkOutDateTime, outGateNumber, and outVehicleNumber
 //       visitorStaff.society.staff[staffIndex].checkOutDateTime = new Date();
 //       visitorStaff.society.staff[staffIndex].outGateNumber = outGateNumber;
 //       visitorStaff.society.staff[staffIndex].outVehicleNumber = outVehicleNumber;
-  
+
 //       // Save the updated visitor staff record
 //       await visitorStaff.save();
-  
+
 //       res.status(200).json({ success: true, message: 'Staff checked out successfully' });
 //     } catch (error) {
 //       console.error('Error checking out staff:', error);
 //       res.status(500).json({ success: false, message: 'Error checking out staff', error: error.message });
 //     }
 //   };
-  
+
 const VisitorStaff = require('../models/VisitorsServices');
 const Services = require('../models/Services');
 
 exports.checkInStaff = async (req, res) => {
   try {
-    const { societyId, id } = req.body;
-    const userid = id;
+    const { societyId, userid, inGateNumber, inVehicleNumber } = req.body;
+    console.log("hi", societyId, userid);
 
-    const serviceTypes = [
-      'maid', 'milkMan', 'cook', 'paperBoy', 'driver', 'water', 'plumber', 
-      'carpenter', 'electrician', 'painter', 'moving', 'mechanic', 
-      'appliance', 'pestClean'
-    ];
+    const serviceTypes = ['maid', 'milkMan', 'cook', 'paperBoy', 'driver', 'water', 'plumber', 'carpenter', 'electrician', 'painter', 'moving', 'mechanic', 'appliance', 'pestClean'];
 
-    const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
+    const existingCheckIn = await VisitorStaff.findOne({
+      'society.societyId': societyId,
+      'society.staff.userId': userid,
+      'society.staff.checkOutDateTime': { $exists: false }
+    });
 
-    if (visitorStaff) {
-      const staffMember = visitorStaff.society.staff.find(
-        staff => staff.userId === userid && !staff.checkOutDateTime
-      );
-
-      if (staffMember) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'User is already checked in and must check out before checking in again' 
-        });
-      }
+    if (existingCheckIn) {
+      return res.status(400).json({ success: false, message: 'User is already checked in and must check out before checking in again' });
     }
 
     let checkInRecord;
@@ -129,25 +120,32 @@ exports.checkInStaff = async (req, res) => {
       const serviceProvider = await Services.findOne({
         'society.societyId': societyId,
         [`society.${serviceType}.userid`]: userid
-      });
+      }, { [`society.${serviceType}.$`]: 1 }); // Fetch only the matching subdocument
 
       if (serviceProvider) {
+        // Extract the name from the matching service type
+        const userDetail = serviceProvider.society[serviceType].find(service => service.userid === userid);
+        const userName = userDetail ? userDetail.name : null;
+
+        // Prepare check-in record
         checkInRecord = {
-          serviceType,
+          serviceType, // Save the service type
           userId: userid,
-          inGateNumber: req.body.inGateNumber,
-          inVehicleNumber: req.body.inVehicleNumber,
-          serviceProvider: serviceProvider._id,
-          checkInDateTime: new Date()
+          name: userName, // Add the name to the check-in record
+          inGateNumber,
+          inVehicleNumber,
+          serviceProvider: serviceProvider._id, // Save the serviceProvider._id
+          checkInDateTime: new Date() // Add a check-in timestamp
         };
 
+        // Update the visitor staff collection
         await VisitorStaff.findOneAndUpdate(
           { 'society.societyId': societyId },
           { $push: { 'society.staff': checkInRecord } },
           { new: true, upsert: true }
         );
 
-        break;
+        break; // Exit loop once a match is found
       }
     }
 
@@ -163,35 +161,26 @@ exports.checkInStaff = async (req, res) => {
 };
 
 
+
 exports.checkOutStaff = async (req, res) => {
   try {
-    const { societyId, id, outGateNumber, outVehicleNumber } = req.body;
-
+    const { societyId, userId, outGateNumber, outVehicleNumber } = req.body;
+    console.log(societyId, userId, outGateNumber, outVehicleNumber)
     const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
 
     if (!visitorStaff) {
       return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
     }
 
-
-    const staffIndex = visitorStaff.society.staff
-      .map(staff => staff.userId)
-      .lastIndexOf(id);
-
+    const staffIndex = visitorStaff.society.staff.findIndex(staff => staff.userId === userId);
 
     if (staffIndex === -1) {
       return res.status(404).json({ success: false, message: 'Staff member not found or already checked out' });
     }
 
-
-    if (visitorStaff.society.staff[staffIndex].checkOutDateTime) {
-      return res.status(400).json({ success: false, message: 'Staff member has already checked out' });
-    }
-
     visitorStaff.society.staff[staffIndex].checkOutDateTime = new Date();
     visitorStaff.society.staff[staffIndex].outGateNumber = outGateNumber;
     visitorStaff.society.staff[staffIndex].outVehicleNumber = outVehicleNumber;
-
 
     await visitorStaff.save();
 
@@ -202,61 +191,59 @@ exports.checkOutStaff = async (req, res) => {
   }
 };
 
+exports.getAllStaffRecords = async (req, res) => {
+  try {
+    const { societyId } = req.params;
 
-  exports.getAllVisitorsStaffBySocietyId = async (req, res) => {
-    try {
-      const { societyId } = req.params;
-      const society = await VisitorStaff.findOne({ 'society.societyId': societyId });
-  
-      if (!society) {
-        return res.status(404).json({ success: false, message: 'Society not found' });
-      }
-  
-      res.status(200).json({ success: true, staff: society.society.staff });
-    } catch (error) {
-      console.log("Error in getting all staff by societyId:", error);
-      res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
+    const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
+
+    if (!visitorStaff) {
+      return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
     }
-  };
-  
 
-  exports.getVisitorsStaffByIdAndSocietyId = async (req, res) => {
-    try {
-      const { societyId, userId } = req.params;
-      const society = await VisitorStaff.findOne({
-        'society.societyId': societyId,
-        'society.staff.userId': userId
-      });
-
-
-      if (!society) {
-        return res.status(404).json({ success: false, message: 'Staff not found' });
-      }
-  
-      const staff = society.society.staff.find(v => v.userId === userId);
-      return res.status(200).json({ success: true, staff });
-    } catch (error) {
-      console.error("Error in getting staff by id and societyId:", error);
-
-      res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
-    }
-  };
-
-
-  
-  exports.getAllStaffRecords = async (req, res) => {
-    try {
-        const { societyId } = req.params; 
-
-        const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
-
-        if (!visitorStaff) {
-            return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
-        }
-
-        res.status(200).json({ success: true, staffRecords: visitorStaff.society.staff });
-    } catch (error) {
-        console.error('Error fetching staff records:', error);
-        res.status(500).json({ success: false, message: 'Error fetching staff records', error: error.message });
-    }
+    res.status(200).json({ success: true, staffRecords: visitorStaff.society.staff });
+  } catch (error) {
+    console.error('Error fetching staff records:', error);
+    res.status(500).json({ success: false, message: 'Error fetching staff records', error: error.message });
+  }
 };
+exports.getAllVisitorsStaffBySocietyId = async (req, res) => {
+  try {
+    const { societyId } = req.params;
+    const society = await VisitorStaff.findOne({ 'society.societyId': societyId });
+
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Society not found' });
+    }
+
+    res.status(200).json({ success: true, staff: society.society.staff });
+  } catch (error) {
+    console.log("Error in getting all staff by societyId:", error);
+    res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
+  }
+};
+
+
+exports.getVisitorsStaffByIdAndSocietyId = async (req, res) => {
+  try {
+    const { societyId, userId } = req.params;
+    const society = await VisitorStaff.findOne({
+      'society.societyId': societyId,
+      'society.staff.userId': userId
+    });
+
+
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Staff not found' });
+    }
+
+    const staff = society.society.staff.find(v => v.userId === userId);
+    return res.status(200).json({ success: true, staff });
+  } catch (error) {
+    console.error("Error in getting staff by id and societyId:", error);
+
+    res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
+  }
+};
+
+
