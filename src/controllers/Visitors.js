@@ -48,20 +48,21 @@ exports.createVisitors = async (req, res) => {
   try {
     upload(req, res, async (err) => {
       if (err) {
+        console.log(err,"uploaderror")
         return res.status(500).json({ success: false, message: 'An error occurred in uploading files' });
       }
       try {
         const { societyId, name, phoneNumber, isFrequent, block, flatNo, role, reason, details, inGateNumber, status, inVehicleNumber, company, date } = req.body;
         let { checkInDateTime } = req.body;
+        console.log(req.files)
 
         if (checkInDateTime === '1') {
           checkInDateTime = Date.now();
         }
 
         let pictures = '';
-        console.log(req.files)
-        if (req.file && req.files['pictures'] && req.files['pictures'].length > 0) {
-         console.log(req.files)
+        if (req.files && req.files['pictures'] && req.files['pictures'].length > 0) {
+        
           pictures = `/publicVisitorsPictures/${req.files['pictures'][0].filename}`;
         } else {
           console.log('No picture files uploaded');
