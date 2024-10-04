@@ -122,7 +122,7 @@ exports.createVisitors = async (req, res) => {
           { $set: { 'society.visitors.$.qrImage': qrCodeUrl } }
         );
 
-        res.status(201).json({ success: true, message: 'Visitor created successfully' });
+         res.status(201).json({ success: true, message: 'Visitor created successfully' , data: { savedVisitor, qrCodeUrl } });
       } catch (error) {
         console.log("Error in creating visitor:", error);
         res.status(500).json({ success: false, message: 'An error occurred in creating visitor' });
