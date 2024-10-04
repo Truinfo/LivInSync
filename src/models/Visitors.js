@@ -5,7 +5,7 @@ const visitorSchema = new mongoose.Schema({
     societyId: {
       type: mongoose.Schema.Types.ObjectId,
       // ref: "Societys",
-      ref: "society",
+      ref: "Societys",
       required: true,
     },
     visitors: [{
@@ -59,9 +59,14 @@ const visitorSchema = new mongoose.Schema({
       },
       status: {
         type: String,
-        enum: ['Waiting', 'Check In', 'Check Out'],
+        enum: ['Waiting', 'Check In', 'Check Out', 'Reject'],
         required: true,
         default: "Waiting",
+      },
+      userAccess: {
+        type: String,
+        enum: ['Wait', 'Allow', 'Deny',],
+        default: "Wait",
       },
       date: {
         type: String

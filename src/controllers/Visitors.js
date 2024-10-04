@@ -5,7 +5,6 @@ const shortid = require('shortid');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
 const Visitor = require('../models/Visitors');
-const notifyModel = require('../models/Notifications');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -21,12 +20,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Multer upload configuration
-const upload = multer({ storage }).fields([
-  { name: "pictures", maxCount: 1 },
-  { name: "qrImage", maxCount: 1 }
-]);
-
 
 const generatedUserIdCodes = new Set();
 
@@ -35,26 +28,28 @@ const generateUserIdCode = () => {
   let userIdCode;
   do {
     userIdCode = '';
-    for (let i = 0; i < 6; i++) { // Generating a 6-digit numeric code
-      userIdCode += Math.floor(Math.random() * 10); // Random number between 0 and 9
+    for (let i = 0; i < 6; i++) {
+      userIdCode += Math.floor(Math.random() * 10); 
     }
   } while (generatedUserIdCodes.has(userIdCode));
   generatedUserIdCodes.add(userIdCode);
   return userIdCode;
 };
 
+const upload = multer({ storage }).fields([
+  { name: "pictures", maxCount: 1 },
+  { name: "qrImage", maxCount: 1 }
+]);
 
 exports.createVisitors = async (req, res) => {
   try {
     upload(req, res, async (err) => {
       if (err) {
-        console.log(err,"uploaderror")
         return res.status(500).json({ success: false, message: 'An error occurred in uploading files' });
       }
       try {
-        const { societyId, name, phoneNumber, isFrequent, block, flatNo, role, reason, details, inGateNumber, status, inVehicleNumber, company, date } = req.body;
+        const { societyId, name, phoneNumber, block, flatNo, role, reason, details, inGateNumber, status, inVehicleNumber, company, date, userAccess } = req.body;
         let { checkInDateTime } = req.body;
-        console.log(req.files)
 
         if (checkInDateTime === '1') {
           checkInDateTime = Date.now();
@@ -62,10 +57,7 @@ exports.createVisitors = async (req, res) => {
 
         let pictures = '';
         if (req.files && req.files['pictures'] && req.files['pictures'].length > 0) {
-        
           pictures = `/publicVisitorsPictures/${req.files['pictures'][0].filename}`;
-        } else {
-          console.log('No picture files uploaded');
         }
 
         const visitorId = generateUserIdCode();
@@ -80,13 +72,13 @@ exports.createVisitors = async (req, res) => {
           checkInDateTime,
           inGateNumber,
           status,
+          userAccess,
           reason,
           inVehicleNumber,
           details,
           company,
           pictures,
-          qrImage: null,
-          isFrequent
+          qrImage: null
         };
 
         let savedVisitor;
@@ -123,14 +115,14 @@ exports.createVisitors = async (req, res) => {
 
         await QRCode.toFile(qrCodeFilePath, visitorId);
 
-        const qrCodeUrl = `/publicQRVisitorsPictures/${qrCodeFileName}`;
+        const qrCodeUrl = `/publicQRVisitorsPictures/${qrCodeFileName}`; 
 
         await Visitor.findOneAndUpdate(
           { 'society.societyId': societyId, 'society.visitors.visitorId': visitorId },
           { $set: { 'society.visitors.$.qrImage': qrCodeUrl } }
         );
 
-        res.status(201).json({ success: true, message: 'Visitor created successfully', data: { savedVisitor, qrCodeUrl } });
+        res.status(201).json({ success: true, message: 'Visitor created successfully' });
       } catch (error) {
         console.log("Error in creating visitor:", error);
         res.status(500).json({ success: false, message: 'An error occurred in creating visitor' });
@@ -141,8 +133,6 @@ exports.createVisitors = async (req, res) => {
     res.status(500).json({ success: false, message: 'An error occurred' });
   }
 };
-
-
 
 exports.checkoutVisitor = async (req, res) => {
   try {
@@ -199,6 +189,7 @@ exports.checkoutVisitor = async (req, res) => {
   }
 };
 
+
 exports.checkInVisitor = async (req, res) => {
   try {
     const { societyId, visitorId, inGateNumber, inVehicleNumber } = req.body;
@@ -245,14 +236,6 @@ exports.checkInVisitor = async (req, res) => {
     }
 
     res.status(200).json({ success: true, message: 'Visitor checked in successfully' });
-    if (updatedVisitor) {
-      const notifyData = new notifyModel({
-          Category: "Visitor Checked In",
-          societyId: societyId,
-          message:"Visitor Checked In",
-      })
-      await notifyData.save()
-  }
   } catch (error) {
     console.log("Error in checking in visitor:", error);
     res.status(500).json({ success: false, message: 'An error occurred in checking in visitor' });
@@ -263,9 +246,8 @@ exports.checkInVisitor = async (req, res) => {
 exports.getAllVisitorsBySocietyId = async (req, res) => {
   try {
     const { societyId } = req.params;
-    console.log(societyId)
     const society = await Visitor.findOne({ 'society.societyId': societyId });
-    console.log(society)
+
     if (!society) {
       return res.status(404).json({ success: false, message: 'Society not found' });
     }
@@ -376,75 +358,6 @@ exports.deleteFrequentVisitors = async (req, res) => {
 
 
 
-// delete entry
-
-
-// exports.deleteEntryVisit = async (req, res) => {
-//  const { societyId, block, flatNo, visitorId } = req.params;
-// console.log( societyId, block, flatNo, visitorId)
-//   try {
-//     // Find the society document and remove the visitor from the visitors array
-//    const society = await Visitor.findOne({
-//       'society.societyId': societyId,
-//       'society.visitors.block': block,
-//       'society.visitors.flatNo': flatNo,
-//     });
-// console.log( societyId, block, flatNo, visitorId)
-//     // Check if the society document was found
-//     const visitorIndex = society.society.visitors.findIndex(visitor => visitor.visitorId === visitorId);
-//     if (visitorIndex === -1) {
-//       return res.status(404).json({ success: false, message: 'Visitor not found' });
-//     }
-
-//     // Remove the visitor from the visitors array
-//     society.society.visitors.splice(visitorIndex, 1);
-
-//     // Save the updated society document
-//     await society.save();
-
-//     return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
-//   } catch (error) {
-//     console.error('Error deleting visitor:', error);
-//     return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
-//   }
-// };
-
-
-
-exports.deleteEntryVisit = async (req, res) => {
-  const { societyId, visitorId, flatNo, block } = req.params; // visitorId here refers to the visitor's _id
-console.log( societyId, block, flatNo, visitorId)
-  try {
-    // Find the society document and remove the visitor from the visitors array using $pull and additional matching fields (flatNo, block)
-    const society = await Visitor.findOneAndUpdate(
-      {
-        'society.societyId': societyId,                   // Match society by ID
-        'society.visitors.flatNo': flatNo,                 // Match visitor by flat number
-        'society.visitors.block': block,                   // Match visitor by block
-        'society.visitors._id': visitorId,                 // Match visitor by visitorId
-      },
-      {
-        $pull: { 'society.visitors': { _id: visitorId } }, // Remove the specific visitor from the array
-      },
-      { new: true }  // Return the updated document after deletion
-    );
-
-    // If no society or visitor is found
-    if (!society) {
-      return res.status(404).json({ success: false, message: 'Visitor not found' });
-    }
-
-    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
-  } catch (error) {
-    console.error('Error deleting visitor:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
-  }
-};
-
-
-
-
-
 //get all pre approved Visitors
 exports.getPreApprovedVisitors = async (req, res) => {
   try {
@@ -489,7 +402,7 @@ exports.getAllVisitorsbyFlatNo = async (req, res) => {
     const AllVisitors = society.society.visitors.filter(visitor => {
       return visitor.block === block &&
         visitor.flatNo === flatNo &&
-        visitor.status === 'Check Out';
+        visitor.status === 'Check Out'; 
     });
 
     if (AllVisitors.length === 0) {
@@ -500,5 +413,90 @@ exports.getAllVisitorsbyFlatNo = async (req, res) => {
   } catch (error) {
     console.log("Error in getting pre-approved visitors:", error);
     res.status(500).json({ success: false, message: 'An error occurred in getting pre-approved visitors' });
+  }
+};
+
+
+exports.userAccess = async (req, res) => {
+  try {
+    const { societyId, visitorId, userAccess } = req.body;
+
+    if (!societyId || !visitorId || !userAccess) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const visitor = await Visitor.findOne({
+      'society.societyId': societyId,
+      'society.visitors.visitorId': visitorId
+    });
+
+    if (!visitor) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+    const specificVisitor = visitor.society.visitors.find(v => v.visitorId === visitorId);
+
+    if (specificVisitor.userAccess) {
+      return res.status(400).json({ success: false, message: 'User access already set' });
+    }
+    const updatedVisitor = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,
+        'society.visitors.visitorId': visitorId
+      },
+      {
+        $set: {
+          'society.visitors.$.userAccess': userAccess
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedVisitor) {
+      return res.status(404).json({ success: false, message: 'User access not updated' });
+    }
+
+    res.status(200).json({ success: true, message: 'User access updated successfully' });
+  } catch (error) {
+    console.error("Error in updating user access:", error);
+    res.status(500).json({ success: false, message: 'An error occurred while updating user access' });
+  }
+};
+
+
+exports.denyVisitor = async (req, res) => {
+  try {
+    const { societyId, visitorId } = req.body;
+console.log(societyId, visitorId)
+    const visitor = await Visitor.findOne({
+      'society.societyId': societyId,
+      'society.visitors.visitorId': visitorId,
+    });
+
+    if (!visitor) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    const updatedVisitor = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,
+        'society.visitors.visitorId': visitorId,
+      },
+      {
+        $set: {
+          'society.visitors.$.status': 'Reject',
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedVisitor) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Visitor Entry Denied' });
+    console.log(updatedVisitor)
+  } catch (error) {
+    console.log("Error in denying visitor:", error);
+    res.status(500).json({ success: false, message: 'An error occurred in denying visitor' });
   }
 };
