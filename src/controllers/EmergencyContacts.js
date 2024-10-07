@@ -19,11 +19,11 @@ exports.createEmergencyContact = async (req, res) => {
         societyId: req.body.societyId,// Assuming you pass the apartment ID
         serviceType: req.body.serviceType
     });
-    try {
+     try {
         const newEmergencyContact = await emergencyContact.save();
-        res.status(201).json(newEmergencyContact);
+        res.status(201).json(newEmergencyContact,{ message: 'Successfully Created' });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        res.status(400).json({ message: 'Emergency contacts not created' });
     }
 };
 
