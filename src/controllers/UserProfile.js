@@ -645,3 +645,53 @@ exports.getAllUserProfiles = async (req, res) => {
         return res.status(401).json({ success: false, error });
     }
 }
+exports.verifyResident = async (req, res) => {
+    const { id } = req.params; // Get the userId from request params
+
+    try {
+        console.log(id)
+        // Find the user by their userId and update the isVerified field
+        const updatedResident = await UserProfile.findByIdAndUpdate(
+            id,
+            { isVerified: true },
+            { new: true } // Return the updated document
+        );
+        console.log(updatedResident)
+
+        // Check if the user was found and updated
+        if (!updatedResident) {
+            return res.status(404).json({ message: 'Resident not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Resident verified successfully',
+            updatedResident
+        });
+    } catch (error) {
+        console.error('Error updating verification status:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+exports.deleteResidentRequest = async (req, res) => {
+    const { id, societyId } = req.params; // Extract userId and societyId from request params
+    try {
+        // Find the resident by userId and societyId and delete the document
+        const deletedResident = await UserProfile.findOneAndDelete({
+            _id: id,
+            societyId: societyId, // Match the societyId as well
+        });
+        // Check if the resident was found and deleted
+        if (!deletedResident) {
+            return res.status(404).json({ message: 'Resident or society not found' });
+        }
+        return res.status(200).json({
+            message: 'Resident request deleted successfully',
+            deletedResident,
+        });
+    } catch (error) {
+        console.error('Error deleting resident request:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
