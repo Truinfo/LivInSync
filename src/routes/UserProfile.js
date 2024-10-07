@@ -1,7 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { updateUserProfile, deleteUserProfile, getAllUserProfilesBySocietyId,getAllOwners,resetPassword,getAllUserProfiles, getUserProfilesByIdAndSocietyId, sendVerificationEmail, userSignin, VerifyUserProfile, createUserProfile, forgotPassword, sendForgotVerificationEmail, verifyForgotVerificationOTP, updatePassword, DeletePetBySocietyIdandUSerId, AddPetDetailsBySocietyIdandUSerId, DeleteVehicleBySocietyIdandUSerId, AddVehicleDetailsBySocietyIdandUSerId, DeleteFamilyMembersBySocietyIdandUSerId, AddFamilyMembersBySocietyIdandUSerId } = require("../controllers/UserProfile")
+const { updateUserProfile, deleteUserProfile,verifyResident,deleteResidentRequest, getAllUserProfilesBySocietyId,getAllOwners,resetPassword,getAllUserProfiles, getUserProfilesByIdAndSocietyId, sendVerificationEmail, userSignin, VerifyUserProfile, createUserProfile, forgotPassword, sendForgotVerificationEmail, verifyForgotVerificationOTP, updatePassword, DeletePetBySocietyIdandUSerId, AddPetDetailsBySocietyIdandUSerId, DeleteVehicleBySocietyIdandUSerId, AddVehicleDetailsBySocietyIdandUSerId, DeleteFamilyMembersBySocietyIdandUSerId, AddFamilyMembersBySocietyIdandUSerId } = require("../controllers/UserProfile")
 
 
 router.post('/user/sendVerificationEmail', sendVerificationEmail);
@@ -25,5 +25,6 @@ router.post('/user/verifyForgotVerificationOTP', verifyForgotVerificationOTP);
 router.post('/user/updatePassword',updatePassword);
 router.post('/user/resetPassword',resetPassword);
 router.get('/user/getAllUserProfiles', getAllUserProfiles);
-
+router.put('/user/updateVerificationBy/:id', verifyResident);
+router.delete('/user/deleteREquest/:id/:societyId', deleteResidentRequest);
 module.exports = router;

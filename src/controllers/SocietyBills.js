@@ -27,38 +27,36 @@ exports.createBill = async (req, res) => {
       }
 
       try {
-        const { societyId, name, status, amount, date } = req.body; 
-        console.log(req.body)
+        const { societyId, name, status, amount, monthAndYear } = req.body; 
         let pictures = {};
 
         if (req.file) {
           pictures = `/publicSocietyBills/${req.file.filename}`;
         }
 
-        // Check if the societyId exists
         const existingSociety = await SocietyBills.findOne({ 'society.societyId': societyId });
 
         if (existingSociety) {
-          // Update the existing society with the new bill
           existingSociety.society.bills.push({
             name,
             status,
             amount,
-            date,
+            date: Date.now(),
+            monthAndYear,
             pictures: pictures
           });
 
           await existingSociety.save();
         } else {
-          // Create a new society document
           const societyBill = new SocietyBills({
             society: {
               societyId,
-              bills: [{ // Adding to the bills array
+              bills: [{ 
                 name,
                 status,
                 amount,
-                date,
+                date: Date.now(),
+                monthAndYear,
                 pictures: pictures
               }]
             }
@@ -83,10 +81,11 @@ exports.getBillsBySocietyId = async (req, res) => {
     const bills = await SocietyBills.find({ 'society.societyId': societyId }, { 'society': 1, '_id': 0 });
 
     if (bills.length === 0) {
-      return res.status(404).json({ success: false, message: "No bills found for this society" });
+      return res.status(201).json({ success: true, society:bills });
     }
 
     return res.status(200).json({ success: true, society: bills[0].society });
+
   } catch (error) {
     return res.status(500).json({ success: false, message: `Error: ${error}` });
   }
@@ -122,70 +121,58 @@ exports.getBillById = async (req, res) => {
 
 exports.editBill = async (req, res) => {
   try {
-    upload(req, res, async (err) => {
-      if (err) {
-        console.log("Error uploading file:", err);
-        return res.status(500).json({ success: false, message: 'Error uploading file' });
+    upload(req, res, async (error) => {
+      if (error) {
+        console.error('Error uploading files:', error);
+        return res.status(500).json({ success: false, message: 'Error in uploading files', error: error.message });
       }
 
+      const { id, societyId } = req.params;
+      const updateFields = { ...req.body };
+      delete updateFields.id; // Remove id from updateFields if it's part of req.body
+
       try {
-        const { id, societyId } = req.params;
-        const { name, status, amount, date } = req.body;
+        // Find the specific bill document
+        const billDocument = await SocietyBills.findOne({
+          'society.societyId': societyId,
+          'society.bills._id': id
+        });
 
-        // Prepare fields to be updated
-        const updateFields = { name, status, amount, date };
-
-        if (req.file) {
-          // Retrieve existing bill document
-          const billDocument = await SocietyBills.findOne({ 
-            'society.societyId': societyId,
-            'society.bills._id': id 
-          });
-
-          if (billDocument) {
-            const billItem = billDocument.society.bills.id(id);
-
-            // Delete old image if it exists
-            if (billItem.pictures) {
-              const oldImagePath = path.join(__dirname, '../Uploads/SocietyBills', path.basename(billItem.pictures));
-              if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-              }
-            }
-
-            // Update fields to include the new picture
-            updateFields.pictures = `/publicSocietyBills/${req.file.filename}`;
-          } else {
-            return res.status(404).json({ success: false, message: "Bill not found for the provided societyId" });
-          }
-        }
-
-        // Perform the update operation
-        const updatedBill = await SocietyBills.findOneAndUpdate(
-          { 
-            'society.societyId': societyId,
-            'society.bills._id': id 
-          },
-          { $set: { 'society.bills.$': updateFields } },
-          { new: true }
-        );
-
-        if (updatedBill) {
-          return res.status(200).json({ success: true, message: 'Bill updated successfully' });
-        } else {
+        if (!billDocument) {
           return res.status(404).json({ success: false, message: 'Bill not found' });
         }
-      } catch (error) {
-        console.log(`Error: ${error}`);
-        return res.status(500).json({ success: false, message: `Error: ${error}` });
+
+        const billItem = billDocument.society.bills.id(id);
+
+        if (req.file) {
+          // Handle existing picture deletion if it exists
+          if (billItem.pictures) {
+            const oldImagePath = path.join(__dirname, '../Uploads/SocietyBills', path.basename(billItem.pictures));
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath);
+            }
+          }
+
+          // Update new picture in updateFields
+          updateFields.pictures = `/publicSocietyBills/${req.file.filename}`;
+        }
+
+        // Update the specific bill item in the bills array
+        billItem.set(updateFields);
+
+        await billDocument.save();
+
+        res.status(200).json({ success: true, message: 'Bill updated successfully' });
+      } catch (updateError) {
+        console.error('Error updating bill:', updateError);
+        res.status(500).json({ success: false, message: 'Failed to update bill', error: updateError.message });
       }
     });
   } catch (error) {
-    console.log(`Error: ${error}`);
-    return res.status(500).json({ success: false, message: "Error in updating bill" });
+    console.error('Unknown error:', error);
+    res.status(500).json({ success: false, message: 'Unknown error', error: error.message });
   }
 };
-
 
 
 exports.deleteBill = async (req, res) => {
@@ -206,7 +193,6 @@ exports.deleteBill = async (req, res) => {
       }
     }
 
-    // Remove the bill from the society's bills array
     await SocietyBills.updateOne(
       { 'society.societyId': societyId, 'society.bills._id': id },
       { $pull: { 'society.bills': { _id: id } } }

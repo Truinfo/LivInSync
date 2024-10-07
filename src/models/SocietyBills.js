@@ -22,6 +22,10 @@ const societyBills = new mongoose.Schema({
                 required: true
             },
             date: {
+                type: Date,
+                required: true
+            },
+            monthAndYear: {
                 type: String,
                 required: true
             },
