@@ -18,8 +18,11 @@ const storage = multer.diskStorage({
   }
 })
 
-const upload = multer({ storage }).single('pictures');
 
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+}).single('pictures'); // Make sure this matches the field name in your form
 
 exports.createCommityMembers = async (req, res) => {
   try {
@@ -31,7 +34,7 @@ exports.createCommityMembers = async (req, res) => {
       try {
         const { societyId, name, email, role, designation, phoneNumber, blockNumber, flatNumber } = req.body;
         let pictures = '';
-
+     
         if (req.file) {
           pictures = `/publicCommityPictures/${req.file.filename}`;
         }

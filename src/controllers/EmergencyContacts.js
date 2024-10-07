@@ -21,9 +21,9 @@ exports.createEmergencyContact = async (req, res) => {
     });
     try {
         const newEmergencyContact = await emergencyContact.save();
-        res.status(201).json(newEmergencyContact);
+        res.status(201).json(newEmergencyContact,{ message: 'Successfully Created' });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        res.status(400).json({ message: 'Emergency contacts not created' });
     }
 };
 
@@ -49,11 +49,12 @@ exports.getEmergencyContactBySocietyId = async (req, res, next) => {
 
 // Update an emergency contact
 exports.updateEmergencyContact = async (req, res) => {
-    const { name, phoneNumber, profession } = req.body;
+    const { name, phoneNumber, profession, serviceType } = req.body; // Include serviceType if needed
+    
     try {
         const emergencyContact = await EmergencyContact.findByIdAndUpdate(
             req.params.id,
-            { name, phoneNumber, profession, serviceType },
+            { name, phoneNumber, profession, serviceType }, 
             { new: true, runValidators: true }
         );
 
@@ -61,11 +62,16 @@ exports.updateEmergencyContact = async (req, res) => {
             return res.status(404).json({ message: 'Emergency contact not found' });
         }
 
-        res.json(emergencyContact);
+        res.json({ 
+            message: 'Emergency contact updated successfully.', 
+            emergencyContact 
+        });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error("Error updating emergency contact:", err);
+        res.status(400).json({ message: 'Failed to update emergency contact. ' + err.message });
     }
 };
+
 
 // Delete an emergency contact
 exports.deleteEmergencyContact = async (req, res) => {
