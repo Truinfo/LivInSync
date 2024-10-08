@@ -357,7 +357,7 @@ exports.checkAttendanceStatus = async (req, res) => {
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
     const { status } = req.body; // Only extract status from req.body
-
+console.log(status)
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
 
@@ -374,13 +374,17 @@ exports.addCheckIn = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot check-in while there are open attendance records' });
         }
 
-        // Initialize attendanceRecord with the current date and time
+        // Create the attendance record with the current date
         const attendanceRecord = {
             date: Date.now(), // Use Date.now() for the current date
             status,
-            checkInDateTime: Date.now(), // Set checkInDateTime to the current time
-            checkOutDateTime: null // Initialize checkOutDateTime as null for check-in
         };
+
+        // Only set checkInDateTime and checkOutDateTime if status is 'present'
+        if (status === 'present') {
+            attendanceRecord.checkInDateTime = Date.now(); // Set checkInDateTime to the current time
+            attendanceRecord.checkOutDateTime = null; // Initialize checkOutDateTime as null for check-in
+        }
 
         // Add the new attendance record
         sequrity.attendance.push(attendanceRecord);
@@ -395,6 +399,7 @@ exports.addCheckIn = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to add check-in', error: error.message });
     }
 };
+
 
 
 
