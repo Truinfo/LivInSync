@@ -357,7 +357,7 @@ exports.checkAttendanceStatus = async (req, res) => {
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
     const { status, checkInDateTime, date } = req.body; // Make sure to extract checkInDateTime and date from req.body
-
+console.log(status, checkInDateTime, date )
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
 
@@ -387,10 +387,10 @@ exports.addCheckIn = async (req, res) => {
             };
         } else {
             attendanceRecord = {
-                date,
+                date: Date.now(),
                 status,
-                checkInDateTime,
-                checkOutDateTime: null // Initialize checkOutDateTime as null for check-in
+                checkInDateTime: Date.now(),
+                checkOutDateTime: null 
             };
         }
 
