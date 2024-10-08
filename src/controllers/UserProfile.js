@@ -11,6 +11,7 @@ const Sequrity = require('../models/Authentication/Security');
 const SocietyAdmin = require('../models/Authentication/SocietyAdmin');
 const emailVerificationCache = new NodeCache();
 const bcrypt = require('bcrypt');
+const AdminNotification = require('../models/AdminNotification');
 const saltRounds = 10;
 
 const storage = multer.diskStorage({
@@ -88,14 +89,6 @@ exports.createUserProfile = async (req, res) => {
             flat,
             password,
         } = req.body;
-        console.log(name,
-            mobileNumber,
-            societyId,
-            userType,
-            society,
-            block,
-            flat,
-            password)
         let userProfile = await UserProfile.findById(id);
         if (!userProfile) {
             return res.status(404).json({ success: false, message: "User profile not found." });
@@ -112,6 +105,15 @@ exports.createUserProfile = async (req, res) => {
         userProfile.hash_password = hash_password;
 
         await userProfile.save();
+        const notification = new AdminNotification({
+            societyId: societyId,
+            title: "Resident Request",
+            message: `Requested by ${block}/${flat} `,
+            category: "resident_approval_request",
+            userId: userProfile.userId,
+        });
+        await notification.save();
+
         return res.status(200).json({ success: true, message: "User profile updated successfully" });
     } catch (error) {
         console.log(error);

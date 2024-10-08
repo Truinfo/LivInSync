@@ -7,6 +7,7 @@ const fs = require('fs');
 const shortid = require('shortid');
 const UserProfile = require('../models/UserProfile');
 const Societys = require('../models/Authentication/SocietyAdmin');
+const AdminNotification = require('../models/AdminNotification');
 const storage = multer.diskStorage({
   destination: function (res, file, cb) {
     const destinationPath = path.join(__dirname, '../Uploads/Advertisements')
@@ -25,7 +26,6 @@ const upload = multer({ storage }).fields([
 ]);
 
 exports.createAdvertisements = async (req, res) => {
-
   try {
     upload(req, res, async (err) => {
       if (err) {
@@ -59,6 +59,7 @@ exports.createAdvertisements = async (req, res) => {
         }
 
         const userId = userdata.userId;
+
         const advertisement = new Advertisements({
           societyId,
           userId,
@@ -69,11 +70,22 @@ exports.createAdvertisements = async (req, res) => {
           phoneNumber,
           pictures,
         });
-        console.log("dfgd", advertisement)
 
         await advertisement.save();
 
-        return res.status(201).json({ success: true, message: 'Successfully added' });
+        // Notification
+        const notification = new AdminNotification({
+          societyId: societyId,
+          title: "Advertisement",
+          message: "New Post uploaded",
+          category: "Adds_notification",
+          userId: userId,
+        });
+
+        await notification.save();
+
+        // Send a single response after everything is done
+        return res.status(201).json({ success: true, message: 'Successfully added', notification });
       } catch (error) {
         console.log(`Error: ${error}`);
         return res.status(401).json({ success: false, message: `Error: ${error.message}` });
