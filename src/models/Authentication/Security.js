@@ -1,82 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const sequritySchema = new mongoose.Schema({
-//         societyId: {
-//             type: mongoose.Schema.Types.ObjectId,
-//             ref: "SocietyAdmin",
-//             required: true,
-//         },
-//             sequrityId: {
-//                 type: String,
-//                 required: true,
-//                 unique: true
-//             },
-//             name: {
-//                 type: String,
-//                 required: true,
-//             },
-//             phoneNumber: {
-//                 type: String,
-//                 required: true,
-//                 unique: true
-//             },
-//             role: {
-//                 type: String,
-//                 enum:["Sequrity"],
-//                 default: "Sequrity",
-//                 required: true,
-//             },
-//             details: {
-//                 type: String,
-//             },
-//             aadharNumber: {
-//                 type: Number,
-//                 require: true,
-//                 unique: true,
-//             },
-//             address: {
-//                 addressLine1: {
-//                     type: String,
-//                     required: true,
-//                 },
-//                 addressLine2: {
-//                     type: String,
-//                     required: true,
-//                 },
-//                 state: {
-//                     type: String,
-//                     required: true,
-//                 },
-//                 postalCode: {
-//                     type: String,
-//                     required: true,
-//                 },
-//             },
-//             attendance: [{
-//                 date: {
-//                     type: Date,
-//                 },
-//                 status: {
-//                     type: String,
-//                     enum: ['present', 'absent', 'leave'],
-//                     default: 'absent',
-//                 },
-//                 checkInDateTime: {
-//                     type: Date,
-//                 },
-//                 checkOutDateTime: {
-//                     type: Date,
-//                 },
-//             }],
-//             pictures: {
-//                 type: String,
-//             },
-        
-// });
-
-// module.exports = mongoose.model("Sequrity", sequritySchema);
-
-
 const mongoose = require("mongoose");
 
 const sequritySchema = new mongoose.Schema({
@@ -146,7 +67,7 @@ const sequritySchema = new mongoose.Schema({
         status: {
             type: String,
             enum: ['present', 'leave'],
-            default: 'absent',
+            default: 'leave',
         },
         checkInDateTime: {
             type: Date,
