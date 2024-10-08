@@ -356,8 +356,14 @@ exports.checkAttendanceStatus = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    const { status } = req.body; // Only extract status from req.body
-console.log(status)
+    let { status } = req.body; // Extract status from req.body
+
+    // Default status to 'leave' if it's not provided or invalid
+    const validStatuses = ['present', 'leave'];
+    if (!status || !validStatuses.includes(status.toLowerCase())) {
+        status = 'leave'; // Default status if none is provided
+    }
+
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
 
@@ -399,6 +405,7 @@ console.log(status)
         res.status(500).json({ success: false, message: 'Failed to add check-in', error: error.message });
     }
 };
+
 
 
 
