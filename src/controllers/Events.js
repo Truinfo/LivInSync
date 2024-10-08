@@ -4,6 +4,7 @@ const path = require('path');
 const shortid = require("shortid");
 const Events = require("../models/Events");
 const notifyModel = require("../models/Notifications");
+const AdminNotification = require("../models/AdminNotification");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -49,7 +50,7 @@ exports.createEvent = async (req, res) => {
 
             await event.save();
 
-           
+
             return res.status(201).json({ success: true, message: "Successfully Event Created" });
         } catch (error) {
             console.log(error);
@@ -83,6 +84,15 @@ exports.register = async (req, res) => {
 
         event.registrations.push(registration);
         await event.save();
+        const notification = new AdminNotification({
+            societyId: societyId,
+            title: "Event Registration",
+            message: `Participant name ${participantName} `,
+            category: "complaint",
+            userId: participantId,
+        });
+        await notification.save();
+
         res.status(200).json(event);
     } catch (error) {
         console.error(error);

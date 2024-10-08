@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const shortid = require('shortid');
+const AdminNotification = require('../models/AdminNotification');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -165,9 +166,15 @@ exports.updatePaymentDetails = async (req, res) => {
                         pictures: newPictures || null
                     });
                 }
-
                 await maintenance.save();
-
+                const notification = new AdminNotification({
+                    societyId: societyId,
+                    title: "Maintenance Bill",
+                    message: `Requested by ${blockno}/${flatno} `,
+                    category: "maintenance_payment",
+                    userId: userId,
+                });
+                await notification.save();
                 res.status(200).json({ success: true, message: 'Payment details updated successfully', data: maintenance });
             } catch (error) {
                 console.error('Error updating payment details:', error);
@@ -197,7 +204,7 @@ exports.getPaymentsBySocietyBlockFlat = async (req, res) => {
             return res.status(404).json({ success: false, message: 'No maintenance records found for the given society ID' });
         }
 
-        const payments = maintenanceRecords.flatMap(record => 
+        const payments = maintenanceRecords.flatMap(record =>
             record.society.paymentDetails
                 .filter(detail => detail.blockno === blockno && detail.flatno === flatno)
                 .map(detail => ({
@@ -210,7 +217,7 @@ exports.getPaymentsBySocietyBlockFlat = async (req, res) => {
             return res.status(404).json({ success: false, message: 'No payment details found for the given block and flat' });
         }
 
-        res.status(200).json({ success: true, payments});
+        res.status(200).json({ success: true, payments });
     } catch (error) {
         console.error('Error fetching payment details:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch payment details', error: error.message });

@@ -1,3 +1,4 @@
+const AdminNotification = require('../models/AdminNotification');
 const Complaint = require('../models/Complaints');
 const notifyModel = require('../models/Notifications');
 
@@ -15,6 +16,15 @@ exports.createComplaint = async (req, res) => {
             })
             await notifyData.save()
         }
+        const notification = new AdminNotification({
+            societyId: newComplaint.societyId,
+            title: "Complaint Rised",
+            message: `${newComplaint.complaintCategory}Sender Name ${newComplaint.complaintBy} `,
+            category: "event_registration",
+            userId: newComplaint.userId,
+        });
+        await notification.save();
+
         res.status(201).json({ success: true, complaint: newComplaint });
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
