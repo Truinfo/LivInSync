@@ -500,3 +500,40 @@ console.log(societyId, visitorId)
     res.status(500).json({ success: false, message: 'An error occurred in denying visitor' });
   }
 };
+exports.denyVisitor = async (req, res) => {
+  try {
+    const { societyId, visitorId } = req.body;
+console.log(societyId, visitorId)
+    const visitor = await Visitor.findOne({
+      'society.societyId': societyId,
+      'society.visitors.visitorId': visitorId,
+    });
+
+    if (!visitor) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    const updatedVisitor = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,
+        'society.visitors.visitorId': visitorId,
+      },
+      {
+        $set: {
+          'society.visitors.$.status': 'Reject',
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedVisitor) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Visitor Entry Denied' });
+    console.log(updatedVisitor)
+  } catch (error) {
+    console.log("Error in denying visitor:", error);
+    res.status(500).json({ success: false, message: 'An error occurred in denying visitor' });
+  }
+};

@@ -356,16 +356,14 @@ exports.checkAttendanceStatus = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    const { date, status, checkInDateTime } = req.body;
-
+    const { status } = req.body; // Only extract status from req.body
+console.log(status)
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
 
         if (!sequrity) {
             return res.status(404).json({ success: false, message: 'Sequrity not found' });
         }
-
-        const formattedDate = new Date(date).toISOString().slice(0, 10);
 
         // Check if there's any open attendance record (check-out not recorded) for any date
         const openAttendanceExists = sequrity.attendance.some(record =>
@@ -376,20 +374,16 @@ exports.addCheckIn = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot check-in while there are open attendance records' });
         }
 
-        // Create a new attendance record for check-in
-        let attendanceRecord;
-        if (!checkInDateTime) {
-            attendanceRecord = {
-                date,
-                status
-            };
-        } else {
-            attendanceRecord = {
-                date,
-                status,
-                checkInDateTime,
-                checkOutDateTime: null // Initialize checkOutDateTime as null for check-in
-            };
+        // Create the attendance record with the current date
+        const attendanceRecord = {
+            date: Date.now(), // Use Date.now() for the current date
+            status,
+        };
+
+        // Only set checkInDateTime and checkOutDateTime if status is 'present'
+        if (status === 'present') {
+            attendanceRecord.checkInDateTime = Date.now(); // Set checkInDateTime to the current time
+            attendanceRecord.checkOutDateTime = null; // Initialize checkOutDateTime as null for check-in
         }
 
         // Add the new attendance record
@@ -407,9 +401,10 @@ exports.addCheckIn = async (req, res) => {
 };
 
 
+
+
 exports.addCheckOut = async (req, res) => {
     const { sequrityId, attendanceId } = req.params;
-    const { checkOutDateTime } = req.body;
 
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
@@ -430,10 +425,8 @@ exports.addCheckOut = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Check-out already recorded for this attendance' });
         }
 
-        // Update the checkOutDateTime only if it's null
-        if (attendanceRecord.checkOutDateTime === null) {
-            attendanceRecord.checkOutDateTime = checkOutDateTime;
-        }
+        // Update the checkOutDateTime to the current date and time
+        attendanceRecord.checkOutDateTime = Date.now(); // Use Date.now() for the current date and time
 
         await sequrity.save();
 
