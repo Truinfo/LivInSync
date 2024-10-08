@@ -305,54 +305,6 @@ exports.deleteSequrityProfilePicture = async (req, res) => {
     }
 };
 
-exports.checkAttendanceStatus = async (req, res) => {
-    const { sequrityId } = req.params;
-    const { date } = req.body;
-    try {
-        const sequrity = await Sequrity.findOne({ sequrityId });
-
-        if (!sequrity) {
-            return res.status(404).json({ success: false, message: 'Sequrity not found' });
-        }
-
-        // Find all attendance records for the given date
-        const lastDate = sequrity.attendance;
-        const lastAttendedDate = lastDate[lastDate.length - 1];
-
-        const attendanceRecords = sequrity.attendance.filter(record =>
-            record.date.toISOString().slice(0, 10) === new Date(date).toISOString().slice(0, 10)
-        );
-
-        if (attendanceRecords.length === 0) {
-            return res.status(200).json({ success: true, status: 'No CheckIn', attendanceRecords: lastAttendedDate });
-        }
-
-        // Get the latest attendance record (last in the list)
-        const latestAttendanceRecord = attendanceRecords[attendanceRecords.length - 1];
-
-        // Check if there's no checkInDateTime and status is 'leave'
-        if (!latestAttendanceRecord.checkInDateTime && latestAttendanceRecord.status === 'leave') {
-            return res.status(200).json({ success: true, status: 'In Leave', attendanceRecords: lastAttendedDate });
-        }
-
-        // Check if there's a checkInDateTime but no checkOutDateTime and status is 'present'
-        if (latestAttendanceRecord.checkInDateTime && !latestAttendanceRecord.checkOutDateTime && latestAttendanceRecord.status === 'present') {
-            return res.status(200).json({ success: true, status: 'Already checkin But no checkOut', attendanceRecords: lastAttendedDate });
-        }
-
-        // Check if there's both checkInDateTime and checkOutDateTime and status is 'present'
-        if (latestAttendanceRecord.checkInDateTime && latestAttendanceRecord.checkOutDateTime && latestAttendanceRecord.status === 'present') {
-            return res.status(200).json({ success: true, status: 'Already Checkout', attendanceRecords: lastAttendedDate });
-        }
-
-        // If none of the above conditions match (shouldn't normally happen)
-        return res.status(200).json({ success: true, status: 'Unknown' });
-
-    } catch (error) {
-        console.error('Error checking attendance status:', error);
-        res.status(500).json({ success: false, message: 'Failed to check attendance status', error: error.message });
-    }
-};
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
