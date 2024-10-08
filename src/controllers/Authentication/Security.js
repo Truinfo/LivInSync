@@ -308,7 +308,7 @@ exports.deleteSequrityProfilePicture = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    const { status, checkInDateTime, date } = req.body; // Make sure to extract checkInDateTime and date from req.body
+    const { status, checkInDateTime, date } = req.body; 
 console.log(status, checkInDateTime, date )
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });

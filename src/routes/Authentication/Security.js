@@ -3,6 +3,7 @@ const express = require('express');
 const { createSequrity, updateSequrityProfile, getSequritiesBySocietyId, deleteSequrityProfilePicture, getGuardBySocietyIdAndId, sequirtySignin, getSequrityBySocietyIdAndsequrityId, getAttendanceOfSequrityId, addCheckIn, addCheckOut, } = require('../../controllers/Authentication/Security');
 const router = express.Router();
 
+
 router.post('/sequrity/createSequrity', createSequrity);
 router.post('/sequrity/sequirtySignin', sequirtySignin);
 router.get('/sequrity/getSequrityBySocietyId/:societyId', getSequritiesBySocietyId);
