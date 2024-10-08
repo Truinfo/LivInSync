@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const shortid = require("shortid");
+const AdminNotification = require("../models/AdminNotification");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -153,7 +154,7 @@ exports.updateAmenity = async (req, res) => {
 exports.deleteAmenity = async (req, res) => {
   const { id } = req.params;
   try {
-    const amenity = await Amenity.findById(id );
+    const amenity = await Amenity.findById(id);
     if (!amenity) {
       return res.status(404).json({ success: false, message: "Amenity not found" });
     }
@@ -258,6 +259,14 @@ exports.bookAmenity = async (req, res) => {
     // Save the updated amenity
     await amenity.save();
 
+    const notification = new AdminNotification({
+      societyId: amenity.societyId,
+      title: "Ameniety Booking",
+      message: `Function Hall Booked`,
+      category: "amenietyBooking",
+      userId: userId,
+    });
+    await notification.save();
     return res.status(201).json({ success: true, message: "Amenity booked successfully" });
   } catch (error) {
     console.error(`Error booking amenity: ${error}`);
