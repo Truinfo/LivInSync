@@ -6,6 +6,6 @@ const { getNotificationsBySociety, updateNotificationStatus } = require('../cont
 router.get('/adminNotificationsBy/:societyId', getNotificationsBySociety);
 
 // Route to update notification status by ID
-router.put('/notifications/:id/', updateNotificationStatus);
+router.delete('/deleteNotifications/:id', updateNotificationStatus);
 
 module.exports = router;

@@ -2,7 +2,6 @@ const AdminNotification = require('../models/AdminNotification');
 const Complaint = require('../models/Complaints');
 const notifyModel = require('../models/Notifications');
 
-// Create a new complaint
 exports.createComplaint = async (req, res) => {
     try {
         const newComplaint = new Complaint(req.body);
@@ -18,9 +17,9 @@ exports.createComplaint = async (req, res) => {
         }
         const notification = new AdminNotification({
             societyId: newComplaint.societyId,
-            title: "Complaint Rised",
-            message: `${newComplaint.complaintCategory}Sender Name ${newComplaint.complaintBy} `,
-            category: "event_registration",
+            title: `${newComplaint.complaintCategory}`,
+            message: `${newComplaint.complaintBy} `,
+            category: "complaint",
             userId: newComplaint.userId,
         });
         await notification.save();

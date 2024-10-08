@@ -17,21 +17,18 @@ exports.getNotificationsBySociety = async (req, res) => {
 };
 
 exports.updateNotificationStatus = async (req, res) => {
+
     try {
         const { id } = req.params;
-        const { status } = req.body;
-
-        if (!['unread', 'read'].includes(status)) {
-            return res.status(400).json({ success: false, message: "Invalid status value." });
-        }
-        const notification = await AdminNotification.findById(id);
+        console.log(id)
+        const notification = await AdminNotification.findByIdAndDelete(id)
         if (!notification) {
             return res.status(404).json({ success: false, message: "Notification not found." });
         }
-        notification.status = "read";
+
         await notification.save();
 
-        return res.status(200).json({ success: true, message: "Notification status updated successfully." });
+        return res.status(200).json({ success: true, message: "Notification deleted successfully." });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: "Error updating notification status." });
