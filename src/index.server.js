@@ -62,7 +62,7 @@ const FeaturesRoute = require("./routes/Features");
 const PlansRoute = require("./routes/Plans");
 const DemoRoute = require("./routes/Demo");
 const NotificationRoute = require("./routes/Notifications");
-
+const adminNotificationRoute=require("./routes/AdminNotification")
 const { IndividualChat, GroupChat } = require("./models/Message");
 const notifyModel = require("./models/Notifications");
 
@@ -125,6 +125,7 @@ app.use('/api', SocietyIncome);
 app.use('/api', SocietyBills);
 app.use('/api', MaintananceRoute);
 app.use('/api', FlatOwnerRoutes);
+app.use('/api', adminNotificationRoute);
 app.use('/api/events', EventsRoutes(io));
 
 io.on('connection', (socket) => {
