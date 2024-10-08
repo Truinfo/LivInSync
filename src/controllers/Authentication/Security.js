@@ -356,12 +356,11 @@ exports.checkAttendanceStatus = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    let { status } = req.body; // Extract status from req.body
+    let { status } = req.body; 
 
-    // Default status to 'leave' if it's not provided or invalid
     const validStatuses = ['present', 'leave'];
     if (!status || !validStatuses.includes(status.toLowerCase())) {
-        status = 'leave'; // Default status if none is provided
+        status = 'leave'; 
     }
 
     try {
