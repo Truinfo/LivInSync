@@ -317,8 +317,6 @@ console.log(status, checkInDateTime, date )
             return res.status(404).json({ success: false, message: 'Sequrity not found' });
         }
 
-        const formattedDate = new Date(date).toISOString().slice(0, 10);
-
         // Check if there's any open attendance record (check-out not recorded) for any date
         const openAttendanceExists = sequrity.attendance.some(record =>
             record.checkOutDateTime === null
