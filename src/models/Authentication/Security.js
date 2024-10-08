@@ -67,7 +67,6 @@ const sequritySchema = new mongoose.Schema({
         status: {
             type: String,
             enum: ['present', 'leave'],
-            default: 'leave',
         },
         checkInDateTime: {
             type: Date,
