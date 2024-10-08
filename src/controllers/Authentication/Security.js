@@ -356,12 +356,7 @@ exports.checkAttendanceStatus = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    let { status } = req.body; 
-
-    const validStatuses = ['present', 'leave'];
-    if (!status || !validStatuses.includes(status.toLowerCase())) {
-        status = 'leave'; 
-    }
+    const { status  } = req.body;
 
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
@@ -369,6 +364,8 @@ exports.addCheckIn = async (req, res) => {
         if (!sequrity) {
             return res.status(404).json({ success: false, message: 'Sequrity not found' });
         }
+
+        const formattedDate = new Date(date).toISOString().slice(0, 10);
 
         // Check if there's any open attendance record (check-out not recorded) for any date
         const openAttendanceExists = sequrity.attendance.some(record =>
@@ -379,19 +376,22 @@ exports.addCheckIn = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot check-in while there are open attendance records' });
         }
 
-        // Create the attendance record with the current date
-        const attendanceRecord = {
-            date: Date.now(), // Use Date.now() for the current date
-            status,
-        };
-
-        // Only set checkInDateTime and checkOutDateTime if status is 'present'
-        if (status === 'present') {
-            attendanceRecord.checkInDateTime = Date.now(); // Set checkInDateTime to the current time
-            attendanceRecord.checkOutDateTime = null; // Initialize checkOutDateTime as null for check-in
+        // Create a new attendance record for check-in
+        let attendanceRecord;
+        if (!checkInDateTime) {
+            attendanceRecord = {
+                date: Date.now(),
+                status
+            };
+        } else {
+            attendanceRecord = {
+                date: Date.now(),
+                status,
+                checkInDateTime : Date.now(),
+                checkOutDateTime: null 
+            };
         }
 
-        // Add the new attendance record
         sequrity.attendance.push(attendanceRecord);
 
         // Save the updated sequrity document
