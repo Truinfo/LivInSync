@@ -21,7 +21,9 @@
 
 
 const express = require('express');
-const { createVisitors, checkoutVisitor, getAllVisitorsBySocietyId, getVisitorsBySocietyIdLast24Hours, getVisitorByIdAndSocietyId, checkInVisitor, AddPetDetailsBySocietyIdandBlockAndFlatNo, getFrequentVisitorById, getFrequentVisitors, deleteFrequentVisitors, getPreApprovedVisitors, getAllVisitorsbyFlatNo, userAccess, denyVisitor } = require('../controllers/Visitors');
+const { createVisitors, checkoutVisitor, getAllVisitorsBySocietyId, getVisitorsBySocietyIdLast24Hours, getVisitorByIdAndSocietyId, 
+       checkInVisitor, AddPetDetailsBySocietyIdandBlockAndFlatNo, getFrequentVisitorById, getFrequentVisitors, deleteFrequentVisitors,
+       getPreApprovedVisitors, getAllVisitorsbyFlatNo, userAccess, denyVisitor,deleteEntryVisit  } = require('../controllers/Visitors');
 const router = express.Router();
 
 router.post('/createVisitors', createVisitors);
