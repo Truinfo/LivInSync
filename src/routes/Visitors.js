@@ -37,5 +37,6 @@ router.get('/getFrequentVisitors/:societyId/:block/:flatNo', getFrequentVisitors
 router.get('/getPreApprovedVisitors/:societyId/:block/:flatNo', getPreApprovedVisitors);
 router.get('/getAllVisitorsbyFlatNo/:societyId/:block/:flatNo', getAllVisitorsbyFlatNo);
 router.delete('/deleteFrequentVisitor/:societyId/:block/:flatNo/:visitorId', deleteFrequentVisitors);
+router.delete('/deleteEntryVisitor/:societyId/:block/:flatNo/:visitorId', deleteEntryVisit);
 
 module.exports = router;
