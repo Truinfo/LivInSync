@@ -537,3 +537,34 @@ console.log(societyId, visitorId)
     res.status(500).json({ success: false, message: 'An error occurred in denying visitor' });
   }
 };
+
+exports.deleteEntryVisit = async (req, res) => {
+  const { societyId, visitorId, flatNo, block } = req.params; // visitorId here refers to the visitor's _id
+console.log( societyId, block, flatNo, visitorId)
+  try {
+    // Find the society document and remove the visitor from the visitors array using $pull and additional matching fields (flatNo, block)
+    const society = await Visitor.findOneAndUpdate(
+      {
+        'society.societyId': societyId,                   // Match society by ID
+        'society.visitors.flatNo': flatNo,                 // Match visitor by flat number
+        'society.visitors.block': block,                   // Match visitor by block
+        'society.visitors._id': visitorId,                 // Match visitor by visitorId
+      },
+      {
+        $pull: { 'society.visitors': { _id: visitorId } }, // Remove the specific visitor from the array
+      },
+      { new: true }  // Return the updated document after deletion
+    );
+
+    // If no society or visitor is found
+    if (!society) {
+      return res.status(404).json({ success: false, message: 'Visitor not found' });
+    }
+
+    return res.status(200).json({ success: true, message: 'Visitor deleted successfully', society });
+  } catch (error) {
+    console.error('Error deleting visitor:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+};
+

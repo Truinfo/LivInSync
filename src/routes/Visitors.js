@@ -21,7 +21,9 @@
 
 
 const express = require('express');
-const { createVisitors, checkoutVisitor, getAllVisitorsBySocietyId, getVisitorsBySocietyIdLast24Hours, getVisitorByIdAndSocietyId, checkInVisitor, AddPetDetailsBySocietyIdandBlockAndFlatNo, getFrequentVisitorById, getFrequentVisitors, deleteFrequentVisitors, getPreApprovedVisitors, getAllVisitorsbyFlatNo, userAccess, denyVisitor } = require('../controllers/Visitors');
+const { createVisitors, checkoutVisitor, getAllVisitorsBySocietyId, getVisitorsBySocietyIdLast24Hours, getVisitorByIdAndSocietyId, 
+       checkInVisitor, AddPetDetailsBySocietyIdandBlockAndFlatNo, getFrequentVisitorById, getFrequentVisitors, deleteFrequentVisitors,
+       getPreApprovedVisitors, getAllVisitorsbyFlatNo, userAccess, denyVisitor,deleteEntryVisit  } = require('../controllers/Visitors');
 const router = express.Router();
 
 router.post('/createVisitors', createVisitors);
@@ -37,5 +39,6 @@ router.get('/getFrequentVisitors/:societyId/:block/:flatNo', getFrequentVisitors
 router.get('/getPreApprovedVisitors/:societyId/:block/:flatNo', getPreApprovedVisitors);
 router.get('/getAllVisitorsbyFlatNo/:societyId/:block/:flatNo', getAllVisitorsbyFlatNo);
 router.delete('/deleteFrequentVisitor/:societyId/:block/:flatNo/:visitorId', deleteFrequentVisitors);
+router.delete('/deleteEntryVisitor/:societyId/:block/:flatNo/:visitorId', deleteEntryVisit);
 
 module.exports = router;

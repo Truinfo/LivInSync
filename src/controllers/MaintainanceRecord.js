@@ -224,6 +224,7 @@ exports.getPaymentsBySocietyBlockFlat = async (req, res) => {
     }
 };
 
+
 exports.getPaymentsBySocietyBlockFlatMonthAndYear = async (req, res) => {
     try {
         const { societyId, blockno, flatno, monthAndYear } = req.params;
