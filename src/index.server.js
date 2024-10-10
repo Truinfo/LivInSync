@@ -546,15 +546,15 @@ socket.on('editPoll', async (data) => {
   });
 
   // Notify To Gate
-  socket.on('joinSecurityPanel', (data) => {
+ socket.on('joinSecurityPanel', (data) => { 
     socket.join(data.societyId);
   });
-  socket.on('Notify-Gate', (data) => {
+  socket.on('Notify-Gate', (data) => { 
     io.to(data.societyId).emit('Gate_alert_received', {
-      alert: data.option,
-      block: data.block,
-      flatNumber: data.flatNumber,
-      residentName: data.residentName,
+      alert: data.alarmData.option,
+      block: data.alarmData.block,
+      flatNumber: data.alarmData.flatNumber,
+      residentName: data.alarmData.residentName,
       alertTime: new Date(), // Optional: Include the time of the alert
     });
   });
