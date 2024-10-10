@@ -476,20 +476,14 @@ exports.renewSocietyPlan = async (req, res) => {
     console.log(req.body);
     try {
         const { societyId, newPlan, paymentMethod, paymentStatus, selectedFeatures, transactionId, price } = req.body;
-
         // Find the society by ID
         const society = await SocietyAdmin.findById(societyId);
-
         if (!society) {
             return res.status(404).json({ message: "Society not found" });
         }
-
         const startDate = new Date();
-        const expiryDate = new Date();
-															
-											
+        const expiryDate = new Date();								
         expiryDate.setFullYear(startDate.getFullYear() + 1); // Add one year to the start date
-
         // Update the society's plan details
         society.startDate = startDate;
         society.expiryDate = expiryDate;
@@ -501,14 +495,7 @@ exports.renewSocietyPlan = async (req, res) => {
 		society.isRenewal = true
         society.paymentDate = new Date();
         society.selectedFeatures = selectedFeatures
-		
-        // Update selected features if provided
-        // if (selectedFeatures) {
-        //     // Convert selectedFeatures from object to Map if necessary
-        //     society.selectedFeatures = new Map(Object.entries(selectedFeatures));
-        // }
-
-        // Save the updated society details
+	
         await society.save();
 
         // Log payment details

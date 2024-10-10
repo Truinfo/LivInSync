@@ -62,9 +62,10 @@ const FeaturesRoute = require("./routes/Features");
 const PlansRoute = require("./routes/Plans");
 const DemoRoute = require("./routes/Demo");
 const NotificationRoute = require("./routes/Notifications");
-const adminNotificationRoute=require("./routes/AdminNotification")
+const adminNotificationRoute = require("./routes/AdminNotification")
 const { IndividualChat, GroupChat } = require("./models/Message");
 const notifyModel = require("./models/Notifications");
+const MarketPlaceRoute = require("./routes/MarketPlace")
 
 
 app.use(cors());
@@ -126,6 +127,7 @@ app.use('/api', SocietyBills);
 app.use('/api', MaintananceRoute);
 app.use('/api', FlatOwnerRoutes);
 app.use('/api', adminNotificationRoute);
+app.use('/api', MarketPlaceRoute);
 app.use('/api/events', EventsRoutes(io));
 
 io.on('connection', (socket) => {
@@ -339,8 +341,8 @@ io.on('connection', (socket) => {
     try {
       // Delete the poll from the database
       console.log(pollId.pollId)
-      const result=await Polls.findByIdAndDelete(pollId.pollId);
-       console.log(result,pollId.pollId)
+      const result = await Polls.findByIdAndDelete(pollId.pollId);
+      console.log(result, pollId.pollId)
       // Fetch the updated list of polls
       const remainingPolls = await Polls.find(); // Adjust the query as needed
       // Notify all clients about the deletion and send the updated polls
@@ -349,42 +351,42 @@ io.on('connection', (socket) => {
       console.error("Error deleting poll:", error);
     }
   });
-socket.on('editPoll', async (data) => {
-  try {
-    const { pollId, updatedPollData } = data;
+  socket.on('editPoll', async (data) => {
+    try {
+      const { pollId, updatedPollData } = data;
 
-    // Validate the poll ID
-    const isValidPollId = mongoose.Types.ObjectId.isValid(pollId);
-    if (!isValidPollId) {
-      return socket.emit('edit_poll_error', { success: false, message: "Invalid poll ID" });
+      // Validate the poll ID
+      const isValidPollId = mongoose.Types.ObjectId.isValid(pollId);
+      if (!isValidPollId) {
+        return socket.emit('edit_poll_error', { success: false, message: "Invalid poll ID" });
+      }
+
+      // Find the poll and update it
+      const updatedPoll = await Polls.findByIdAndUpdate(
+        pollId,
+        { $set: { poll: updatedPollData } }, // Update poll with the new data
+        { new: true } // Return the updated document
+      );
+
+      // Check if the poll was found and updated
+      if (!updatedPoll) {
+        return socket.emit('edit_poll_error', { success: false, message: "Poll not found" });
+      }
+
+      // Notify all clients about the updated poll
+      const remainingPolls = await Polls.find();
+      io.emit('pollsUpdated', remainingPolls);
+
+      // Send success response back to the client
+      io.to(updatedPoll.societyId).emit("polls_by_society_id", updatedPoll);
+    } catch (error) {
+      console.error("Error editing poll:", error);
+      socket.emit('edit_poll_error', { success: false, message: "Error editing poll", error: error.message });
     }
-
-    // Find the poll and update it
-    const updatedPoll = await Polls.findByIdAndUpdate(
-      pollId,
-      { $set: { poll: updatedPollData }  }, // Update poll with the new data
-      { new: true } // Return the updated document
-    );
-
-    // Check if the poll was found and updated
-    if (!updatedPoll) {
-      return socket.emit('edit_poll_error', { success: false, message: "Poll not found" });
-    }
-
-    // Notify all clients about the updated poll
-    const remainingPolls = await Polls.find();
-    io.emit('pollsUpdated', remainingPolls);
-    
-    // Send success response back to the client
-    io.to(updatedPoll.societyId).emit("polls_by_society_id", updatedPoll);
-  } catch (error) {
-    console.error("Error editing poll:", error);
-    socket.emit('edit_poll_error', { success: false, message: "Error editing poll", error: error.message });
-  }
-});
+  });
 
 
-  
+
   //chat
   socket.on('createGroup', async (data) => {
     console.log(data)
@@ -565,7 +567,7 @@ socket.on('editPoll', async (data) => {
   });
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running and listening on port ${process.env.PORT||3000}`);
+server.listen(process.env.PORT || 2000, () => {
+  console.log(`Server running and listening on port ${process.env.PORT || 3000}`);
 });
 
