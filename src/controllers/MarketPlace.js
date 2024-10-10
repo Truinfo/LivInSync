@@ -73,8 +73,8 @@ exports.addProduct = async (req, res) => {
 exports.getSocietyProducts = async (req, res) => {
     try {
         const products = await marketPlaceModel.find({ societyId: req.params.societyId })
-            .populate('userId') 
-            .populate('societyId'); 
+            .populate('userId')
+            .populate('societyId');
         res.status(200).json(products);
     } catch (error) {
         console.error("Error fetching products", error);
@@ -88,6 +88,15 @@ exports.getProductById = async (req, res) => {
         const product = await marketPlaceModel.findById(req.params.id)
             .populate('userId',)
             .populate('societyId',);
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching product' });
+    }
+};
+exports.getProductByUserId = async (req, res) => {
+    try {
+        const product = await marketPlaceModel.find({ userId: req.params.userId })
         if (!product) return res.status(404).json({ error: 'Product not found' });
         res.status(200).json(product);
     } catch (error) {
@@ -108,5 +117,52 @@ exports.deleteProduct = async (req, res) => {
         res.status(200).json({ message: 'Product removed successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting product' });
+    }
+};
+
+exports.updateProduct = async (req, res) => {
+    try {
+        upload(req, res, async (err) => {
+            if (err) {
+                return res.status(500).json({ success: false, message: 'An error occurred while uploading files' });
+            }
+            try {
+                const { title, description, price, category, type, contactNumber } = req.body;
+                const productId = req.params.id; // Assuming you're sending product ID as a URL parameter
+
+                const updatedProductData = {
+                    title,
+                    description,
+                    price,
+                    category,
+                    type,
+                    contactNumber,
+                };
+
+                // Handle image uploads
+                if (req.files && req.files['pictures']) {
+                    const newPictures = req.files['pictures'].map(image => ({
+                        img: `/publicPictures/${image.filename}`,
+                    }));
+
+                    // Assuming you have a method to find the product by ID and update it
+                    const updatedProduct = await marketPlaceModel.findByIdAndUpdate(productId, {
+                        $set: updatedProductData,
+                        $push: { pictures: { $each: newPictures } } // Add new pictures
+                    }, { new: true }); // Returns the updated document
+
+                    return res.status(200).json({ success: true, message: 'Product updated successfully', product: updatedProduct });
+                } else {
+                    const updatedProduct = await marketPlaceModel.findByIdAndUpdate(productId, updatedProductData, { new: true });
+
+                    return res.status(200).json({ success: true, message: 'Product updated successfully', product: updatedProduct });
+                }
+            } catch (error) {
+                console.log(`Error: ${error}`);
+                return res.status(401).json({ success: false, message: `Error: ${error.message}` });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating product' });
     }
 };
