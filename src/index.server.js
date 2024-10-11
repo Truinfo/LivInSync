@@ -276,7 +276,7 @@ io.on('connection', (socket) => {
       let polls = await Polls.find({ societyId: societyId });
       console.log(polls,"polls data")
       if (!polls || polls.length === 0) {
-        io.to(socket.id).emit("polls_by_society_id", []);
+        io.to(societyId).emit("polls_by_society_id", []);
       } else {
         const currentDate = new Date();
         // Iterate through polls to update status if expiry date has passed and status is true
@@ -298,11 +298,12 @@ io.on('connection', (socket) => {
             return poll; // Return unchanged poll if conditions are not met
           }
         }));
-        io.to(socket.id).emit("polls_by_society_id", polls);
+        console.log(socket.id,"socket.id")
+        io.to(societyId).emit("polls_by_society_id", polls);
       }
     } catch (error) {
       console.error("Error fetching polls by society ID:", error);
-      io.to(socket.id).emit("polls_by_society_id_error", error.message);
+      io.to(societyId).emit("polls_by_society_id_error", error.message);
     }
   });
   socket.on('vote_for__polls_by_UserID', async (data) => {
