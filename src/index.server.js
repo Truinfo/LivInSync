@@ -66,7 +66,7 @@ const adminNotificationRoute = require("./routes/AdminNotification")
 const { IndividualChat, GroupChat } = require("./models/Message");
 const notifyModel = require("./models/Notifications");
 const MarketPlaceRoute = require("./routes/MarketPlace")
-
+const UPIRoute=require("./routes/UPI")
 
 app.use(cors());
 app.use(express.json());
@@ -128,6 +128,7 @@ app.use('/api', MaintananceRoute);
 app.use('/api', FlatOwnerRoutes);
 app.use('/api', adminNotificationRoute);
 app.use('/api', MarketPlaceRoute);
+app.use('/api', UPIRoute);
 app.use('/api/events', EventsRoutes(io));
 
 io.on('connection', (socket) => {
