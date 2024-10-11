@@ -268,10 +268,13 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('get_polls_by_society_id', async (data) => {
+   
     const { societyId } = data;
+     console.log(societyId)
     try {
       // Fetch polls based on societyId
       let polls = await Polls.find({ societyId: societyId });
+      console.log(polls,"polls data")
       if (!polls || polls.length === 0) {
         io.to(socket.id).emit("polls_by_society_id", []);
       } else {
