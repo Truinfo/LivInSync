@@ -152,11 +152,11 @@ io.on('connection', (socket) => {
   socket.on("get_society_individual_chat_list", async (data, callback) => {
     try {
       const chatList = await IndividualChat.find({ participants: { $in: [data.societyId] } })
-        .populate('participants')  
-        .populate('messages.sender')  
+        .populate('participants')
+        .populate('messages.sender')
         .exec();
       socket.emit('chat_list_Society', chatList);
-      if (callback) callback(null, chatList); 
+      if (callback) callback(null, chatList);
     } catch (error) {
       console.error('Error fetching chat list:', error);
       if (callback) callback(error);
@@ -171,7 +171,7 @@ io.on('connection', (socket) => {
         participants: { $in: [data.id] }
       })
         .populate('participants')
-        .populate('messages.sender')  
+        .populate('messages.sender')
         .exec();
       socket.emit('chat_list_Residents', chatList);
     } catch (error) {
@@ -541,7 +541,8 @@ io.on('connection', (socket) => {
   // Notify To Gate
 
   socket.on('Notify-Gate', (data) => {
-    io.to(data.societyId).emit('Gate_alert_received', {
+    console.log(data)
+    io.to(data.alarmData.societyId).emit('Gate_alert_received', {
       alert: data.alarmData.option,
       block: data.alarmData.block,
       flatNumber: data.alarmData.flatNumber,
