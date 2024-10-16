@@ -243,7 +243,6 @@ io.on('connection', (socket) => {
         poll,
         blocks: poll.blocks, // Add blocks to the poll
       });
-      console.log(newPoll)
       await newPoll.save();
       // Emit to users in the specific society room
       const remainingPolls = await Polls.find();
@@ -271,7 +270,6 @@ io.on('connection', (socket) => {
     try {
       // Fetch polls based on societyId
       let polls = await Polls.find({ societyId: societyId });
-      console.log(polls,"polls data")
       if (!polls || polls.length === 0) {
         io.to(societyId).emit("polls_by_society_id", []);
       } else {
@@ -295,7 +293,6 @@ io.on('connection', (socket) => {
             return poll; // Return unchanged poll if conditions are not met
           }
         }));
-        console.log(socket.id,"socket.id")
         io.to(societyId).emit("polls_by_society_id", polls);
       }
     } catch (error) {
@@ -312,12 +309,10 @@ io.on('connection', (socket) => {
         return socket.emit('vote_error', { success: false, message: "Invalid poll ID" });
       }
       const poll = await Polls.findById(pollId._id);
-      console.log(poll, "poll");
       if (!poll) {
         return socket.emit('vote_error', { success: false, message: "Poll not found" });
       } else {
-        const existingVote = poll.poll.votes.find(vote => vote.userId === userId);
-        console.log(existingVote, "existingVote");
+        const existingVote = poll.poll.votes.find(vote => vote.userId === userId);;
         if (existingVote) {
           return socket.emit('vote_error', { success: false, message: "You Have Already Voted in this POLL" });
         }
@@ -342,9 +337,7 @@ io.on('connection', (socket) => {
   socket.on('deletePoll', async (pollId) => {
     try {
       // Delete the poll from the database
-      console.log(pollId.pollId)
       const result = await Polls.findByIdAndDelete(pollId.pollId);
-      console.log(result, pollId.pollId)
       // Fetch the updated list of polls
       const remainingPolls = await Polls.find(); // Adjust the query as needed
       // Notify all clients about the deletion and send the updated polls
@@ -571,14 +564,15 @@ io.on('connection', (socket) => {
 
   socket.on("AddVisitor", (data) => {
     console.log(data)
-    io.to(data.userId).emit("Visitor_Notification", {
+    const sendingDate = {
       visitorName: data.data.visitorName,
       flatNumber: data.data.flatNumber,
       buildingName: data.data.buildingName,
       societyId: data.data.societyId,
       userId: data.data.userId,
       action: "approve or decline",
-    });
+    }
+    socket.emit("Visitor_Notification", sendingDate);
   });
   // Handle user response to visitor notification
 
