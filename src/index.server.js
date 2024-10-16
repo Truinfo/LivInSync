@@ -9,11 +9,10 @@ const http = require('http');
 const socketIo = require("socket.io")
 const server = http.createServer(app);
 
-
 env.config()
 const io = socketIo(server, {
   cors: {
-    origin: "https://livinsync.onrender.com", // Update this to the correct client origin in production
+    origin: "https://livinsync.onrender.com",
   }
 });
 mongoose.connect(
@@ -66,7 +65,7 @@ const adminNotificationRoute = require("./routes/AdminNotification")
 const { IndividualChat, GroupChat } = require("./models/Message");
 const notifyModel = require("./models/Notifications");
 const MarketPlaceRoute = require("./routes/MarketPlace")
-const UPIRoute=require("./routes/UPI")
+const UPIRoute = require("./routes/UPI")
 
 app.use(cors());
 app.use(express.json());
@@ -268,12 +267,14 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('get_polls_by_society_id', async (data) => {
+    console.log("start")
     const { societyId } = data;
+    console.log(societyId)
     try {
       // Fetch polls based on societyId
       let polls = await Polls.find({ societyId: societyId });
       if (!polls || polls.length === 0) {
-        io.to(socket.id).emit("polls_by_society_id", []);
+        io.to(societyId).emit("polls_by_society_id", []);
       } else {
         const currentDate = new Date();
         // Iterate through polls to update status if expiry date has passed and status is true
@@ -497,6 +498,7 @@ io.on('connection', (socket) => {
       socket.emit('error', { message: 'Error removing resident', error });
     }
   });
+
   socket.on('getChatHistory', async (groupId) => {
     try {
       const groupChat = await GroupChat.findById(groupId).populate('messages.sender', 'name'); // Populate sender details if needed
@@ -510,14 +512,11 @@ io.on('connection', (socket) => {
       socket.emit('chatHistoryError', 'Failed to fetch chat history');
     }
   });
+  //create events\
 
-
-  //create events 
   socket.on('create_notice', async (data) => {
     try {
-      // Destructure the notice data
       const { societyId, sender, subject, description, date } = data.formData;
-      // Create a new notice instance
       const notice = new NoticeBoard({
         societyId: societyId,
         sender: sender,
@@ -525,7 +524,6 @@ io.on('connection', (socket) => {
         description: description,
         date: date
       });
-      // Save the notice to the database
       await notice.save();
       // If notice is saved successfully, emit the notification to the specific society room
       io.to(societyId).emit('newNotification', {
@@ -547,12 +545,9 @@ io.on('connection', (socket) => {
       socket.emit('notice_error', 'Failed to create notice');
     }
   });
-
   // Notify To Gate
- socket.on('joinSecurityPanel', (data) => { 
-    socket.join(data.societyId);
-  });
-  socket.on('Notify-Gate', (data) => { 
+
+  socket.on('Notify-Gate', (data) => {
     io.to(data.societyId).emit('Gate_alert_received', {
       alert: data.alarmData.option,
       block: data.alarmData.block,
@@ -562,13 +557,57 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('joinSecurityPanel', (data) => {
+    console.log(data, "Security")
+    socket.join(data);
+  });
+
+  socket.on('joinUser', (data) => {
+    console.log(data, "joinUser")
+    socket.join(data);
+    console.log("join user")
+  });
+  // Notify user about a visitor
+
+  socket.on("AddVisitor", (data) => {
+    console.log(data)
+    io.to(data.userId).emit("Visitor_Notification", {
+      visitorName: data.data.visitorName,
+      flatNumber: data.data.flatNumber,
+      buildingName: data.data.buildingName,
+      societyId: data.data.societyId,
+      userId: data.data.userId,
+      action: "approve or decline",
+    });
+  });
+  // Handle user response to visitor notification
+
+  socket.on("Visitor_Response", (data) => {
+    console.log("Visitor_Response", data);
+    const responseMessage = {
+      visitorName: data.visitorName,
+      response: data.response,
+      flatNumber: data.flatNumber,
+      buildingName: data.buildingName,
+      residentName: data.residentName,
+      userId: data.userId,
+      societyId: data.societyId,
+      alertTime: new Date(),
+    };
+    // Notify security about the user's response
+
+    io.to(data.societyId).emit(
+      "Visitor_Response_Notification",
+      responseMessage
+    );
+  });
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
 
-server.listen(process.env.PORT || 2000, () => {
+server.listen(process.env.PORT || 3000, () => {
   console.log(`Server running and listening on port ${process.env.PORT || 3000}`);
 });
 

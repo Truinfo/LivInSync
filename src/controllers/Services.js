@@ -54,7 +54,7 @@ exports.createService = async (req, res) => {
 
       const { societyId, serviceType, name, phoneNumber, address, timings } = req.body;
 
-
+      console.log(req.body)
       // Validate required fields
       if (!societyId || !serviceType || !name || !phoneNumber || !address || !timings) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });

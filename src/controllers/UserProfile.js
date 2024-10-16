@@ -457,6 +457,7 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ message: 'New password must be at least 6 characters long.' });
         }
         const userProfile = await UserProfile.findById(userId);
+        console.log(userProfile, "profile")
         if (!userProfile) {
             return res.status(404).json({ message: 'User not found.' });
         }
@@ -468,6 +469,7 @@ exports.resetPassword = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         userProfile.hash_password = hashedPassword;
+        console.log(hashedPassword)
         await userProfile.save();
 
         return res.status(200).json({ message: 'Password has been reset successfully.' });
