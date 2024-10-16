@@ -3,12 +3,11 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Create a transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', // Use the email service you prefer
+  service: 'Gmail', 
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Use the App Password here
+    pass: process.env.EMAIL_PASSWORD, 
   },
 });
 

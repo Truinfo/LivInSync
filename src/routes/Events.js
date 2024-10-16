@@ -1,18 +1,8 @@
 const express = require("express");
-const { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent, register } = require("../controllers/Events");
+const { getAllEvents, getEventById, updateEvent, deleteEvent, register } = require("../controllers/Events");
 const Events = require("../models/Events");
 
 const router = express.Router();
-
-// router.post("/createEvent", createEvent);
-// router.post("/register/:id", register);
-// router.get("/getAllEvents/:societyId", getAllEvents);
-// router.get("/getEventById/:id/:societyId", getEventById);
-// router.put("/updateEvent/:societyId/:id", updateEvent);
-// router.delete("/deleteEvent/:id/:societyId", deleteEvent);
-
-// module.exports = router;
-
 
 
 const multer = require('multer');
@@ -72,7 +62,7 @@ module.exports = (io) => {
                     })
                     await notifyData.save()
                 }
-                res.status(201).json({event,message:"Event Created Successfully!!"});
+                res.status(201).json({ event, message: "Event Created Successfully!!" });
             } catch (error) {
                 console.log(error);
                 res.status(400).json({ error: error.message });

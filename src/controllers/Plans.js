@@ -61,41 +61,7 @@ exports.getPlanById = async (req, res) => {
   }
 };
 
-// exports.updatePlan = async (req, res) => {
-//   const { id } = req.params;
-//   const { plan, featureId } = req.body;
-//   try {
-//     const planToUpdate = await Plans.findById(id);
-//     if (!planToUpdate) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Plan Not Found" });
-//     }
-//     if (plan) {
-//       planToUpdate.plan = plan;
-//     }
-//     if (featureId) {
-//       // Check if featureId already exists in the plan
-//       const featureExists = planToUpdate.features.some(
-//         (feature) => feature.featureId.toString() === featureId
-//       );
-//       if (!featureExists) {
-//         planToUpdate.features.push({ featureId });
-//       }
-//     }
 
-//     // Save updated plan
-//     const updatedPlan = await planToUpdate.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Plan Successfully Updated",
-//       data: updatedPlan,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({ success: false, error: error.message });
-//   }
-// };
 
 exports.updatePlan = async (req, res) => {
   const { id } = req.params;

@@ -177,41 +177,6 @@ exports.deleteAmenity = async (req, res) => {
 };
 
 
-// Book an Amenity
-// exports.bookAmenity = async (req, res) => {
-//   const { id } = req.params; // Amenity ID
-//   const { userId, dateOfBooking, payed, pending, status,
-//     eventName, arrivalTime, departureTime, venue, numberOfGuests, eventType
-//   } = req.body;
-//   console.log(req.body, "set")
-//   try {
-//     const amenity = await Amenity.findById(id);
-//     if (!amenity) {
-//       return res.status(404).json({ success: false, message: "Amenity not found" });
-//     }
-//     const newBooking = {
-//       userId,
-//       bookedDate: Date.now(),
-//       dateOfBooking,
-//       payed,
-//       pending,
-//       status,
-//       eventName,
-//       arrivalTime,
-//       departureTime,
-//       venue,
-//       numberOfGuests,
-//       eventType
-//     };
-
-//     amenity.list.push(newBooking);
-//     await amenity.save();
-//     return res.status(201).json({ success: true, message: "Amenity booked successfully" });
-//   } catch (error) {
-//     console.error(`Error booking amenity: ${error}`);
-//     return res.status(500).json({ success: false, error: error.message });
-//   }
-// };
 exports.bookAmenity = async (req, res) => {
   const { id } = req.params; // Amenity ID
   console.log(id)
@@ -274,27 +239,7 @@ exports.bookAmenity = async (req, res) => {
   }
 };
 
-// Get Amenity by ID and User ID
-// exports.getAmenityByIdAndUserId = async (req, res) => {
-//   const { id, userId } = req.params;
 
-//   try {
-//     const amenity = await Amenity.findById(id);
-//     if (!amenity) {
-//       return res.status(404).json({ success: false, message: "Amenity not found" });
-//     }
-
-//     const booking = amenity.list.find((booking) => booking.userId.toString() === userId);
-//     if (!booking) {
-//       return res.status(404).json({ success: false, message: "Booking not found for this user" });
-//     }
-
-//     return res.json({ success: true, booking });
-//   } catch (error) {
-//     console.error(`Error fetching amenity: ${error}`);
-//     return res.status(500).json({ success: false, error: error.message });
-//   }
-// };
 exports.getAmenityByIdAndUserId = async (req, res) => {
   const { id, userId } = req.params;
 

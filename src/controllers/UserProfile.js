@@ -160,52 +160,6 @@ exports.userSignin = async (req, res) => {
 };
 
 
-// exports.userSignin = async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-//         console.log(email);
-
-//         let userProfile = await UserProfile.findOne({ email });
-//         let securityProfile = await Sequrity.findOne({ email });
-
-//         if (!userProfile && !securityProfile) {
-//             return res.status(400).json({ message: "User not found" });
-//         }
-
-//         let profile;
-//         let profileType;
-
-//         if (userProfile) {
-//             profile = userProfile;
-//             profileType = "User";
-//         } else if (securityProfile) {
-//             profile = securityProfile;
-//             profileType = "Sequrity";
-//         }
-
-//         const isPasswordValid = await bcrypt.compare(password, profile.hash_password);
-//         if (!isPasswordValid) {
-//             return res.status(400).json({ message: "Invalid Password" });
-//         }
-
-//         if (profileType === "User" && profile.role !== "User") {
-//             return res.status(400).json({ message: "You do not have User privileges" });
-//         } else if (profileType === "Sequrity" && profile.role !== "Sequrity") {
-//             return res.status(400).json({ message: "You do not have Sequrity privileges" });
-//         }
-
-//         const token = generateJwtToken(profile._id, profile.role);
-
-//         res.status(200).json({
-//             token,
-//             profile,
-//         });
-
-//     } catch (error) {
-//         console.error("Signin error:", error);
-//         return res.status(500).json({ message: "Something went wrong" });
-//     }
-// };
 
 exports.getAllUserProfilesBySocietyId = async (req, res) => {
 
@@ -241,54 +195,6 @@ exports.getUserProfiles = async (req, res) => {
     }
 };
 
-// exports.updateUserProfile = async (req, res) => {
-
-//     try {
-//         upload(req, res, async (error) => {
-//             console.log(error)
-//             if (error) {
-//                 return res.status(301).json({ success: false, message: "Error in Uploading file:", error });
-//             }
-//             const { id } = req.params;
-
-//             const uploadFields = { ...req.body };
-
-//             delete uploadFields.id;
-
-//             try {
-//                 const userprofile = await UserProfile.findById(id);
-//                 if (!userprofile) {
-//                     return res.status(401).json({ success: false, message: "No Match Found" });
-//                 }
-
-//                 // Handle file upload if profilePicture field is present
-//                 if (req.file) {
-//                     console.log(req.file)
-//                     if (userprofile.profilePicture) {
-//                         const oldImagePath = path.join(__dirname, '../Uploads/UserProfile', path.basename(userprofile.profilePicture));
-//                         if (fs.existsSync(oldImagePath)) {
-//                             fs.unlinkSync(oldImagePath);
-//                             console.log("Successfully deleted the old file");
-//                         }
-//                     }
-
-//                     // Update profilePicture field in uploadFields
-//                     uploadFields.profilePicture = `/publicUser/${req.file.fileName}`;
-//                 }
-
-//                 const updatedUserProfile = await UserProfile.findByIdAndUpdate(id, { $set: uploadFields }, { new: true });
-//                 return res.status(201).json({ success: true, message: "Successfully Updated", userProfile: updatedUserProfile });
-
-//             } catch (error) {
-//                 return res.status(501).json({ success: false, message: error });
-//             }
-
-//         });
-
-//     } catch (error) {
-//         return res.status(501).json({ success: false, message: error });
-//     }
-// };
 
 
 exports.updateUserProfile = async (req, res) => {

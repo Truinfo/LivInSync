@@ -1,6 +1,7 @@
 const express = require('express');
-const { createMaintenanceRecords, getByMonthAndYear, updatePaymentDetails, getPaymentsBySocietyBlockFlat, updatePaymentStatus, getPaymentsBySocietyBlockFlatMonthAndYear, getAllMonthsBySocietyId } = require('../controllers/MaintainanceRecord');
-const router =express.Router();
+const { createMaintenanceRecords, getByMonthAndYear, updatePaymentDetails, getPaymentsBySocietyBlockFlat,
+    updatePaymentStatus, getPaymentsBySocietyBlockFlatMonthAndYear, getAllMonthsBySocietyId } = require('../controllers/MaintainanceRecord');
+const router = express.Router();
 
 router.post('/createMaintenanceRecords', createMaintenanceRecords);
 router.get('/getByMonthAndYear/:societyId/:monthAndYear', getByMonthAndYear);

@@ -21,48 +21,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage }).single('pictures');
 
 
-// exports.createDocuments = async (req, res) => {
-//   try {
-//     upload(req, res, async (err) => {
-//       if (err) {
-//         console.log("error in uploading files:", err);
-//         return res.status(500).json({ success: false, message: 'An error occurred in creating files' });
-//       }
-
-//       const { societyId, name, documentTitle, blockNumber, flatNumber } = req.body;
-//       console.log(societyId, name, documentTitle, blockNumber, flatNumber);
-//       console.log(req.file)
-//       if (!req.file) {
-//         // If no document is provided, respond without creating an entry
-//         return res.status(400).json({ success: false, message: "No document file provided" });
-//       }
-      
-//       try {
-//         // If a file is provided, process and save the document
-//         const pictures = `/publicDocuments/${req.file.filename}`;
-
-//         const document = new Documents({
-//           societyId,
-//           name,
-//           documentTitle,
-//           blockNumber,
-//           flatNumber,
-//           pictures
-//         });
-
-//         await document.save();
-//         return res.status(201).json({ success: true, message: "Document successfully added" });
-//       } catch (error) {
-//         console.log(`Error: ${error}`);
-//         return res.status(401).json({ success: false, message: `Error: ${error}` });
-//       }
-//     });
-//   } catch (error) {
-//     console.log(`Error: ${error}`);
-//     return res.status(500).json({ success: false, message: "An error occurred" });
-//   }
-// };
-
 exports.createDocuments = async (req, res) => {
   try {
     upload(req, res, async (err) => {

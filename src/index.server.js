@@ -152,18 +152,18 @@ io.on('connection', (socket) => {
   socket.on("get_society_individual_chat_list", async (data, callback) => {
     try {
       const chatList = await IndividualChat.find({ participants: { $in: [data.societyId] } })
-        .populate('participants')  // Optionally populate participant details
-        .populate('messages.sender')  // Optionally populate sender details in messages
+        .populate('participants')  
+        .populate('messages.sender')  
         .exec();
       socket.emit('chat_list_Society', chatList);
-      if (callback) callback(null, chatList);  // Optionally return the data to the caller
+      if (callback) callback(null, chatList); 
     } catch (error) {
       console.error('Error fetching chat list:', error);
       if (callback) callback(error);
     }
   });
 
-  // Fetch individual chats for a resident by society ID
+
   socket.on('get_resident_individual_chat_list', async (data, callback) => {
     console.log(data, "societyid")
     try {
@@ -171,7 +171,7 @@ io.on('connection', (socket) => {
         participants: { $in: [data.id] }
       })
         .populate('participants')
-        .populate('messages.sender')  // Optionally populate sender details in messages
+        .populate('messages.sender')  
         .exec();
       socket.emit('chat_list_Residents', chatList);
     } catch (error) {
@@ -555,12 +555,6 @@ io.on('connection', (socket) => {
     socket.join(data);
   });
 
-  socket.on('joinUser', (data) => {
-    console.log(data, "joinUser")
-    socket.join(data);
-    console.log("join user")
-  });
-  // Notify user about a visitor
 
   socket.on("AddVisitor", (data) => {
     console.log(data)
@@ -570,9 +564,11 @@ io.on('connection', (socket) => {
       buildingName: data.data.buildingName,
       societyId: data.data.societyId,
       userId: data.data.userId,
+      securityId: data.data.securityId,
       action: "approve or decline",
     }
-    socket.emit("Visitor_Notification", sendingDate);
+    console.log(sendingDate, data.data.societyId)
+    io.to(data.data.societyId).emit("Visitor_Request", sendingDate);
   });
   // Handle user response to visitor notification
 
@@ -586,6 +582,7 @@ io.on('connection', (socket) => {
       residentName: data.residentName,
       userId: data.userId,
       societyId: data.societyId,
+      securityId: data.securityId,
       alertTime: new Date(),
     };
     // Notify security about the user's response

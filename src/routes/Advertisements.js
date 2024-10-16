@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { createAdvertisements, getAdvertisements, getAdvertisementsById, getAdvertisementsByAdv, editAdvertisement, deleteAdvertisement, getAllAdds, getSocietiesByAdvertisements } = require('../controllers/Advertisements');
 
-
 router.post('/createAdvertisements', createAdvertisements);
 router.get('/getAllAdds', getAllAdds);
 router.get('/getAdvertisements/:societyId', getAdvertisements);

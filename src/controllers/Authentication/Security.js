@@ -105,7 +105,7 @@ exports.createSequrity = async (req, res) => {
 
             const savedSequrity = await newSequrity.save();
 
-            res.status(201).json({ success: true, message: 'Security created successfully', savedSequrity});
+            res.status(201).json({ success: true, message: 'Security created successfully', savedSequrity });
         });
     } catch (error) {
         console.error('Error creating security:', error);
@@ -226,7 +226,7 @@ exports.updateSequrityProfile = async (req, res) => {
 
             const { sequrityId } = req.params;
             const uploadFields = { ...req.body };
-      
+
 
             if (req.file) {
                 uploadFields.pictures = `/publicSecurityPictures/${req.file.filename}`;
@@ -308,7 +308,7 @@ exports.deleteSequrityProfilePicture = async (req, res) => {
 
 exports.addCheckIn = async (req, res) => {
     const { sequrityId } = req.params;
-    const { status, checkInDateTime, date } = req.body; 
+    const { status, checkInDateTime, date } = req.body;
 
     try {
         const sequrity = await Sequrity.findOne({ sequrityId });
@@ -340,7 +340,7 @@ exports.addCheckIn = async (req, res) => {
                 date: Date.now(),
                 status,
                 checkInDateTime: Date.now(),
-                checkOutDateTime: null 
+                checkOutDateTime: null
             };
         }
 
@@ -357,10 +357,6 @@ exports.addCheckIn = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to add check-in', error: error.message });
     }
 };
-
-
-
-
 
 exports.addCheckOut = async (req, res) => {
     const { sequrityId, attendanceId } = req.params;
@@ -379,12 +375,10 @@ exports.addCheckOut = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Attendance record not found' });
         }
 
-        // Check if checkOutDateTime is already set
         if (attendanceRecord.checkOutDateTime !== null) {
             return res.status(400).json({ success: false, message: 'Check-out already recorded for this attendance' });
         }
 
-        // Update the checkOutDateTime to the current date and time
         attendanceRecord.checkOutDateTime = Date.now(); // Use Date.now() for the current date and time
 
         await sequrity.save();

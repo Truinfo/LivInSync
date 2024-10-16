@@ -12,9 +12,7 @@ const SuperAdminPayments = require('../../models/Superadmin/PaymentHistory');
 const notifyModel = require('../../models/Notifications');									  
 const emailVerificationCache = new NodeCache();
 const saltRounds = 10;
-const generatedProductCodes = new Set(); // Define a set to store generated product codes
-
-
+const generatedProductCodes = new Set(); 
 
 const generateLicense = () => {
     const characters = '0123456789';
@@ -430,20 +428,7 @@ exports.getSocietyById = async (req, res) => {
     }
 };
 
-// getAllSocieties
-// exports.getAllSocieties = async (req, res) => {
-//     try {
-//         const societies = await SocietyAdmin.find();
-//         res.status(200).json({
-//             societies: societies
-//         });
-//     } catch (error) {
-//         console.error("Error fetching all societies:", error);
-//         res.status(500).json({
-//             message: "Failed to fetch societies"
-//         });
-//     }
-// };
+
 exports.getAllSocieties = async (req, res) => {
     try {
         // Get the current date

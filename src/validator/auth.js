@@ -13,9 +13,6 @@ exports.validateSignUpRequest =
     check('password')
     .isLength({min:6})
     .withMessage("password must be at least 6 characters long"),
-    // check('contactNumber')
-    // .isLength({min:10,max:10})
-    // .withMessage("Phone Number is Invalid"),
 ];
 exports.validateSignInRequest =
 [

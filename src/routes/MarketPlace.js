@@ -1,14 +1,13 @@
-// routes/marketplaceRoutes.js
+
 const express = require('express');
 const { addProduct, getSocietyProducts, getProductById, deleteProduct, getProductByUserId } = require('../controllers/MarketPlace');
-const { userMiddleware } = require('../common-middlewares');
 
 const router = express.Router();
 
-router.post('/AddItems', addProduct); // Add new product
-router.get('/getSocietyItems/:societyId', getSocietyProducts); // Get all products
-router.get('/getItemBy/:id', getProductById); // Get product by ID
-router.delete('/deleteItem/:id', deleteProduct); // Delete product
-router.get('/getMyAddByid/:userId', getProductByUserId); // Delete product
+router.post('/AddItems', addProduct);
+router.get('/getSocietyItems/:societyId', getSocietyProducts);
+router.get('/getItemBy/:id', getProductById);
+router.delete('/deleteItem/:id', deleteProduct);
+router.get('/getMyAddByid/:userId', getProductByUserId);
 
 module.exports = router;

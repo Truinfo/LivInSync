@@ -26,12 +26,12 @@ const groupChatSchema = new mongoose.Schema({
             // refPath: 'messages.senderType' 
             ref: "UserProfile"
         },
-        // senderType: { type: String, enum: ['UserProfile', 'society'], required: true }, // Ensure this field is in the message schema
+        
         content: { type: String },
         createdAt: { type: Date, default: Date.now }
     }]
 });
-// Schema for individual chat
+// 
 const individualChatSchema = new mongoose.Schema({
     societyId: {
         type: mongoose.Schema.Types.ObjectId,

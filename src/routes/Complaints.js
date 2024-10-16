@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { createComplaint, getAllComplaintsBySocietyId, getComplaintBySocietyId, updateComplaint, deleteComplaint,updateComplaintStatus } = require('../controllers/Complaints');
+const { createComplaint, getAllComplaintsBySocietyId, getComplaintBySocietyId, 
+    updateComplaint, deleteComplaint,updateComplaintStatus } = require('../controllers/Complaints');
 
 // Routes for complaints
 router.post('/createComplaint', createComplaint);

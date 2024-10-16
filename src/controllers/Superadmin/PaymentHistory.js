@@ -11,8 +11,6 @@ exports.GetPaymentsList = async (req, res) => {
     }
 }
 
-
-
 exports.updateRenewalStatus = async (req, res) => {
     const { id } = req.body
     try {

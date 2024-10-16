@@ -20,36 +20,7 @@ exports.AddFlatOwnerDetails = async (req, res) => {
     }
 }
 
-// exports.GetDetailsofFlatOwnerById = async (req, res) => {
-//     const { OwnerId } = req.params
-//     try {
-//         const NewUpadate = FlatOwnerModel.find({ _id: OwnerId })
-//         if (!NewUpadate) {
-//             res.status(404).json({ message: "Owner Id not found" });
-//         }
-//         res.status(201).json({
-//             data: NewUpadate
-//         })
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ message: "Internal Server Error" });
-//     }
-// }
 
-// exports.GetDetailsofAllFlatOwners = async (req, res) => {
-//     try {
-//         const NewUpadate = FlatOwnerModel.find()
-//         if (!NewUpadate) {
-//             res.status(404).json({ message: "Data not found" });
-//         }
-//         res.status(201).json({
-//             data: NewUpadate
-//         })
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ message: "Internal Server Error" });
-//     }
-// }
 
 exports.getBySocietyId = async (req, res) => {
     const { societyId } = req.params;
