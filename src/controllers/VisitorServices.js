@@ -1,34 +1,67 @@
-
-const VisitorStaff = require('../models/VisitorsServices');
-const Services = require('../models/Services');
+const VisitorStaff = require("../models/VisitorsServices");
+const Services = require("../models/Services");
 
 exports.checkInStaff = async (req, res) => {
   try {
     const { societyId, userid, inGateNumber, inVehicleNumber } = req.body;
     console.log("hi", societyId, userid);
 
-    const serviceTypes = ['maid', 'milkMan', 'cook', 'paperBoy', 'driver', 'water', 'plumber', 'carpenter', 'electrician', 'painter', 'moving', 'mechanic', 'appliance', 'pestClean'];
+    const serviceTypes = [
+      "maid",
+      "milkMan",
+      "cook",
+      "paperBoy",
+      "driver",
+      "water",
+      "plumber",
+      "carpenter",
+      "electrician",
+      "painter",
+      "moving",
+      "mechanic",
+      "appliance",
+      "pestClean",
+    ];
+    console.log("Checking existing check-in with societyId:", societyId, "and userId:", userid);
 
     const existingCheckIn = await VisitorStaff.findOne({
-      'society.societyId': societyId,
-      'society.staff.userId': userid,
-      'society.staff.checkOutDateTime': { $exists: false }
+      "society.societyId": societyId,
+      "society.staff": {
+        $elemMatch: {
+          userId: userid,
+          checkOutDateTime: { $exists: false }
+        }
+      }
     });
-
+    
+    
+    console.log("existingCheckIn:", existingCheckIn);
+    
     if (existingCheckIn) {
-      return res.status(400).json({ success: false, message: 'User is already checked in and must check out before checking in again' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "User is already checked in and must check out before checking in again",
+        });
     }
 
     let checkInRecord;
     for (let serviceType of serviceTypes) {
-      const serviceProvider = await Services.findOne({
-        'society.societyId': societyId,
-        [`society.${serviceType}.userid`]: userid
-      }, { [`society.${serviceType}.$`]: 1 }); // Fetch only the matching subdocument
+      const serviceProvider = await Services.findOne(
+        {
+          "society.societyId": societyId,
+          [`society.${serviceType}.userid`]: userid,
+        },
+        { [`society.${serviceType}.$`]: 1 }
+      ); // Fetch only the matching subdocument
 
       if (serviceProvider) {
         // Extract the name from the matching service type
-        const userDetail = serviceProvider.society[serviceType].find(service => service.userid === userid);
+        const userDetail = serviceProvider.society[serviceType].find(
+          (service) => service.userid === userid
+        );
         const userName = userDetail ? userDetail.name : null;
 
         // Prepare check-in record
@@ -39,13 +72,13 @@ exports.checkInStaff = async (req, res) => {
           inGateNumber,
           inVehicleNumber,
           serviceProvider: serviceProvider._id, // Save the serviceProvider._id
-          checkInDateTime: new Date() // Add a check-in timestamp
+          checkInDateTime: new Date(), // Add a check-in timestamp
         };
 
         // Update the visitor staff collection
         await VisitorStaff.findOneAndUpdate(
-          { 'society.societyId': societyId },
-          { $push: { 'society.staff': checkInRecord } },
+          { "society.societyId": societyId },
+          { $push: { "society.staff": checkInRecord } },
           { new: true, upsert: true }
         );
 
@@ -54,32 +87,61 @@ exports.checkInStaff = async (req, res) => {
     }
 
     if (!checkInRecord) {
-      return res.status(404).json({ success: false, message: 'UserId not found or invalid for any service type' });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "UserId not found or invalid for any service type",
+        });
     }
 
-    res.status(200).json({ success: true, message: 'Staff checked in successfully', checkInRecord });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Staff checked in successfully",
+        checkInRecord,
+      });
   } catch (error) {
-    console.error('Error checking in staff:', error);
-    res.status(500).json({ success: false, message: 'Error checking in staff', error: error.message });
+    console.error("Error checking in staff:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error checking in staff",
+        error: error.message,
+      });
   }
 };
-
-
 
 exports.checkOutStaff = async (req, res) => {
   try {
     const { societyId, userId, outGateNumber, outVehicleNumber } = req.body;
-    console.log(societyId, userId, outGateNumber, outVehicleNumber)
-    const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
+    console.log(societyId, userId, outGateNumber, outVehicleNumber);
+    const visitorStaff = await VisitorStaff.findOne({
+      "society.societyId": societyId,
+    });
 
     if (!visitorStaff) {
-      return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "Society not found or no staff records",
+        });
     }
 
-    const staffIndex = visitorStaff.society.staff.findIndex(staff => staff.userId === userId);
+    const staffIndex = visitorStaff.society.staff.findIndex(
+      (staff) => staff.userId === userId
+    );
 
     if (staffIndex === -1) {
-      return res.status(404).json({ success: false, message: 'Staff member not found or already checked out' });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "Staff member not found or already checked out",
+        });
     }
 
     visitorStaff.society.staff[staffIndex].checkOutDateTime = new Date();
@@ -88,10 +150,18 @@ exports.checkOutStaff = async (req, res) => {
 
     await visitorStaff.save();
 
-    res.status(200).json({ success: true, message: 'Staff checked out successfully' });
+    res
+      .status(200)
+      .json({ success: true, message: "Staff checked out successfully" });
   } catch (error) {
-    console.error('Error checking out staff:', error);
-    res.status(500).json({ success: false, message: 'Error checking out staff', error: error.message });
+    console.error("Error checking out staff:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error checking out staff",
+        error: error.message,
+      });
   }
 };
 
@@ -99,55 +169,76 @@ exports.getAllStaffRecords = async (req, res) => {
   try {
     const { societyId } = req.params;
 
-    const visitorStaff = await VisitorStaff.findOne({ 'society.societyId': societyId });
+    const visitorStaff = await VisitorStaff.findOne({
+      "society.societyId": societyId,
+    });
 
     if (!visitorStaff) {
-      return res.status(404).json({ success: false, message: 'Society not found or no staff records' });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "Society not found or no staff records",
+        });
     }
 
-    res.status(200).json({ success: true, staffRecords: visitorStaff.society.staff });
+    res
+      .status(200)
+      .json({ success: true, staffRecords: visitorStaff.society.staff });
   } catch (error) {
-    console.error('Error fetching staff records:', error);
-    res.status(500).json({ success: false, message: 'Error fetching staff records', error: error.message });
+    console.error("Error fetching staff records:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching staff records",
+        error: error.message,
+      });
   }
 };
 exports.getAllVisitorsStaffBySocietyId = async (req, res) => {
   try {
     const { societyId } = req.params;
-    const society = await VisitorStaff.findOne({ 'society.societyId': societyId });
+    const society = await VisitorStaff.findOne({
+      "society.societyId": societyId,
+    });
 
     if (!society) {
-      return res.status(404).json({ success: false, message: 'Society not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Society not found" });
     }
 
     res.status(200).json({ success: true, staff: society.society.staff });
   } catch (error) {
     console.log("Error in getting all staff by societyId:", error);
-    res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
+    res
+      .status(500)
+      .json({ success: false, message: "An error occurred in getting staff" });
   }
 };
-
 
 exports.getVisitorsStaffByIdAndSocietyId = async (req, res) => {
   try {
     const { societyId, userId } = req.params;
     const society = await VisitorStaff.findOne({
-      'society.societyId': societyId,
-      'society.staff.userId': userId
+      "society.societyId": societyId,
+      "society.staff.userId": userId,
     });
 
-
     if (!society) {
-      return res.status(404).json({ success: false, message: 'Staff not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Staff not found" });
     }
 
-    const staff = society.society.staff.find(v => v.userId === userId);
+    const staff = society.society.staff.find((v) => v.userId === userId);
     return res.status(200).json({ success: true, staff });
   } catch (error) {
     console.error("Error in getting staff by id and societyId:", error);
 
-    res.status(500).json({ success: false, message: 'An error occurred in getting staff' });
+    res
+      .status(500)
+      .json({ success: false, message: "An error occurred in getting staff" });
   }
 };
-
-
