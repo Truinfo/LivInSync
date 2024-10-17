@@ -6,7 +6,7 @@ const societyAdminSchema = new mongoose.Schema({
         ref: "SuperAdmin",
         required: true,
     },
-    licenseId: {
+    license: {
         type: String,
         required: true,
     },
