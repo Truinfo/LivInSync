@@ -159,4 +159,13 @@ exports.deleteProduct = async (req, res) => {
         res.status(500).json({ error: 'Error deleting product' });
     }
 };
+exports.getAllProducts = async (req, res) => {
+    try {
+        const product = await marketPlaceModel.find()
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching product' });
+    }
+};
 
