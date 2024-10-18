@@ -26,7 +26,8 @@ const upload = multer({ storage }).single('pictures');
 exports.createMaintenanceRecords = async (req, res) => {
     try {
         const { societyId, monthAndYear, amount } = req.body;
-        const society = await SocietyAdmin.findById(societyId);
+        console.log(req.body)
+        const society = await SocietyAdmin.findOne({ 'society.societyId': societyId })
 
         if (!society) {
             return res.status(404).json({ success: false, message: 'Society not found' });
